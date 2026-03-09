@@ -422,8 +422,6 @@ function clearSession() {
 async function callEdgeFunction(fnName, body) {
   const session = loadSession();
 
-  // Monta headers — usa token do usuário se disponível, senão anon key
-  // JWT está desabilitado no Supabase, mas mantemos o header por boa prática
   const headers = {
     'Content-Type': 'application/json',
     'apikey': SUPABASE_ANON_KEY,
@@ -440,15 +438,12 @@ async function callEdgeFunction(fnName, body) {
     body: JSON.stringify(body),
   });
 
-  // Captura o texto bruto para debug ANTES de parsear
+  // Captura texto bruto para debug
   const rawText = await res.text();
-
-  // Salva para debug
   window._lastRawResponse = rawText;
   window._lastStatus = res.status;
 
   if (!res.ok) {
-    // Tenta extrair mensagem de erro do JSON
     let errMsg = `HTTP ${res.status}`;
     try {
       const errData = JSON.parse(rawText);
@@ -459,7 +454,6 @@ async function callEdgeFunction(fnName, body) {
     throw new Error(errMsg);
   }
 
-  // Parse JSON
   let data;
   try {
     data = JSON.parse(rawText);
@@ -469,12 +463,12 @@ async function callEdgeFunction(fnName, body) {
 
   if (data.error) throw new Error(data.error);
 
-  // FIX: extrai o campo correto — a Edge Function retorna { response: "..." }
-  // Aceita também outros campos por segurança
+  // Extrai campo de resposta — aceita múltiplos formatos:
+  // bca-chat  → { response: "texto da IA" }
+  // bca-embed → { response: "resumo", sucesso: true, chunks_salvos: N, ... }
   const reply = data.response ?? data.text ?? data.answer ?? data.content ?? data.result;
-  if (!reply) {
-    // Lança erro descritivo mostrando o que chegou
-    throw new Error(`Campo 'response' não encontrado. Estrutura recebida: ${JSON.stringify(Object.keys(data))}`);
+  if (reply === undefined || reply === null) {
+    throw new Error(`Resposta sem campo 'response'. Campos recebidos: ${JSON.stringify(Object.keys(data))}`);
   }
 
   return reply;
@@ -690,7 +684,7 @@ uz.addEventListener('drop', e => {
   checkReady();
 });
 
-// FIX: lê arquivo como texto (funciona bem para .txt; PDF/DOC terão lixo binário)
+// Lê arquivo como texto UTF-8 (bom para .txt)
 function readFileAsText(file) {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
@@ -698,6 +692,25 @@ function readFileAsText(file) {
     r.onerror = reject;
     r.readAsText(file, 'UTF-8');
   });
+}
+
+// Lê arquivo como base64 (necessário para PDF/DOC/DOCX — são binários)
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = e => {
+      // resultado é "data:application/pdf;base64,AAAA..." — pega só o base64
+      const base64 = e.target.result.split(',')[1];
+      resolve(base64);
+    };
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+// Detecta se o arquivo é binário (precisa de base64)
+function isBinaryFile(file) {
+  return /\.(pdf|doc|docx)$/i.test(file.name);
 }
 
 async function analyzeContract() {
@@ -713,16 +726,23 @@ async function analyzeContract() {
     if (currentMode === 'text') {
       contractText = document.getElementById('manualText').value.trim();
     } else {
-      contractText = await readFileAsText(window._contractFile);
-      // Limpa possíveis bytes binários de PDF deixando só caracteres legíveis
-      contractText = contractText.replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ').trim();
+      const f = window._contractFile;
+      if (isBinaryFile(f)) {
+        // Para PDF/DOC: avisa o usuário que extração no browser é limitada
+        // e sugere usar o modo texto. Tenta mesmo assim via base64 → bca-chat não suporta extração,
+        // então para o comparador usamos readAsText com limpeza agressiva.
+        contractText = await readFileAsText(f);
+        contractText = contractText.replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ')
+                                   .replace(/\s{3,}/g, ' ').trim();
+      } else {
+        contractText = await readFileAsText(f);
+      }
     }
 
     if (!contractText || contractText.length < 20) {
       throw new Error('Não foi possível extrair texto legível do arquivo. Use a aba "Inserir Texto" e cole o conteúdo manualmente.');
     }
 
-    // FIX: envia o texto com o prefixo que a Edge Function espera no modo 'comparador'
     const reply = await callEdgeFunction('bca-chat', {
       message: `TEXTO FORNECIDO PARA COMPARAÇÃO:\n"""\n${contractText.slice(0, 6000)}\n"""`,
       mode: 'comparador'
@@ -792,33 +812,39 @@ async function sendToSupabase() {
     statusEl.className = 'up-file-status status-send';
 
     try {
-      // Lê como texto (funciona bem para .txt)
-      let texto = await readFileAsText(f);
+      let payload;
 
-      // Remove bytes binários se for PDF/DOC
-      if (/\.(pdf|doc|docx)$/i.test(f.name)) {
-        texto = texto.replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g,' ').replace(/\s{3,}/g,' ').trim();
-      }
-
-      if (!texto || texto.length < 50) {
-        throw new Error('Texto extraído muito curto ou ilegível. Use .txt');
+      if (isBinaryFile(f)) {
+        // PDF / DOC / DOCX → envia como base64
+        // A Edge Function extrai o texto server-side com pdf.js / jszip
+        statusEl.textContent = 'Lendo binário...';
+        const base64 = await readFileAsBase64(f);
+        const mime_type = f.type || (f.name.endsWith('.pdf') ? 'application/pdf'
+                        : f.name.endsWith('.docx') ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                        : 'application/msword');
+        payload = { base64, mime_type, nome_arquivo: f.name, tipo: 'documento' };
+      } else {
+        // TXT → envia como texto puro (mais rápido, sem extração)
+        statusEl.textContent = 'Lendo texto...';
+        const texto = await readFileAsText(f);
+        if (!texto || texto.trim().length < 50) throw new Error('Arquivo vazio ou ilegível');
+        payload = { texto: texto.slice(0, 100000), nome_arquivo: f.name, tipo: 'documento' };
       }
 
       statusEl.textContent = 'Vetorizando...';
 
-      const result = await callEdgeFunction('bca-embed', {
-        texto: texto.slice(0, 50000), // limita 50k chars por arquivo
-        nome_arquivo: f.name,
-        tipo: 'documento'
-      });
+      const reply = await callEdgeFunction('bca-embed', payload);
 
-      const chunks = result?.chunks_salvos ?? result;
-      statusEl.textContent = typeof chunks === 'number' ? `OK ✓ (${chunks} chunks)` : 'Indexado ✓';
+      // callEdgeFunction retorna data.response (string de resumo)
+      statusEl.textContent = 'Indexado ✓';
       statusEl.className = 'up-file-status status-ok';
+      // Mostra detalhes do resumo no tooltip
+      statusEl.title = reply;
       ok++;
     } catch(e) {
       statusEl.textContent = 'Erro ✕';
       statusEl.className = 'up-file-status status-err';
+      statusEl.title = e.message;
       console.error(`[BCA] upload erro em ${f.name}:`, e.message);
       fail++;
     }
@@ -831,7 +857,7 @@ async function sendToSupabase() {
     msg.textContent = `✓ ${ok} documento(s) indexado(s) com sucesso! Disponível no Chat Jurídico.`;
     msg.className = 'up-result-msg ok';
   } else if (fail>0) {
-    msg.textContent = `${ok} indexado(s) · ${fail} com erro. Verifique o console para detalhes.`;
+    msg.textContent = `${ok} indexado(s) com sucesso · ${fail} com erro. Passe o mouse sobre "Erro ✕" para ver detalhes.`;
     msg.className = 'up-result-msg err';
   }
 }
