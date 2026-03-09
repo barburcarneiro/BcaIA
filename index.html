@@ -21,7 +21,6 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:var(--email-light); color:var(--dark-gray); font-family:'Lato',sans-serif; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
-  /* TOPBAR */
   .topbar { display:flex; align-items:center; justify-content:space-between; padding:0 2rem; height:56px; background:var(--black); flex-shrink:0; }
   .logo { display:flex; align-items:center; gap:14px; }
   .logo-mark { font-family:'Montserrat',sans-serif; font-weight:700; font-size:1.3rem; color:var(--fendi-light); letter-spacing:0.12em; }
@@ -31,10 +30,8 @@
   .pdot { width:7px; height:7px; border-radius:50%; background:var(--green-gray); animation:pulse 2.5s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  /* LAYOUT */
   .main { display:flex; flex:1; overflow:hidden; }
 
-  /* SIDEBAR */
   .sidebar { width:228px; background:var(--white); border-right:1px solid var(--fendi-border); display:flex; flex-direction:column; flex-shrink:0; }
   .sb-section { padding:1.5rem 1rem 0.5rem; }
   .sb-label { font-family:'Montserrat',sans-serif; font-size:0.6rem; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:var(--fendi); padding:0 0.5rem; margin-bottom:0.6rem; }
@@ -45,20 +42,16 @@
   .sb-footer { margin-top:auto; padding:1rem; border-top:1px solid var(--fendi-border); background:var(--email-light); }
   .sb-footer-text { font-size:0.68rem; color:var(--email-dark); text-align:center; line-height:1.7; }
 
-  /* CONTENT */
   .content { flex:1; display:flex; flex-direction:column; overflow:hidden; }
-
-  /* TABS */
   .tabs { display:flex; padding:0 2rem; background:var(--white); border-bottom:1px solid var(--fendi-border); flex-shrink:0; }
   .tab { padding:0.95rem 1.4rem; font-size:0.78rem; font-family:'Montserrat',sans-serif; font-weight:500; color:var(--email-dark); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.16s; letter-spacing:0.04em; }
   .tab:hover { color:var(--dark-gray); }
   .tab.active { color:var(--fendi); border-bottom-color:var(--fendi); }
 
-  /* PANELS */
   .panel { display:none; flex:1; overflow:hidden; }
   .panel.active { display:flex; flex-direction:column; }
 
-  /* ── CHAT ── */
+  /* CHAT */
   .chat-messages { flex:1; overflow-y:auto; padding:2rem; display:flex; flex-direction:column; gap:1.25rem; }
   .chat-messages::-webkit-scrollbar { width:4px; }
   .chat-messages::-webkit-scrollbar-thumb { background:var(--fendi-border); border-radius:2px; }
@@ -87,111 +80,39 @@
   .error-banner { background:#fdf0f0; border:1px solid #f0c0c0; border-radius:8px; padding:0.65rem 1rem; font-size:0.77rem; color:#b05a5a; margin-top:0.6rem; display:none; }
   .error-banner.show { display:block; }
 
-  /* ── COMPARADOR ── */
-  .comparador { flex:1; display:flex; overflow:hidden; }
-
-  .comp-left {
-    width:400px;
-    flex-shrink:0;
-    background:var(--white);
-    border-right:1px solid var(--fendi-border);
-    overflow-y:auto;
-    padding:1.75rem 1.5rem;
-    display:flex;
-    flex-direction:column;
-    gap:1rem;
+  /* DEBUG PANEL */
+  .debug-panel {
+    background:#0d1117; border:1px solid #2a4a2a; border-radius:8px;
+    padding:0.75rem 1rem; font-size:0.68rem; color:#7ec87e;
+    font-family:'Courier New',monospace; margin-top:0.5rem;
+    max-height:180px; overflow-y:auto; line-height:1.6;
+    white-space:pre-wrap; word-break:break-all; display:none;
   }
-  .comp-left::-webkit-scrollbar { width:4px; }
-  .comp-left::-webkit-scrollbar-thumb { background:var(--fendi-border); border-radius:2px; }
-
-  .comp-right { flex:1; display:flex; flex-direction:column; overflow-y:auto; padding:1.75rem 2rem; }
-  .comp-right::-webkit-scrollbar { width:4px; }
-  .comp-right::-webkit-scrollbar-thumb { background:var(--fendi-border); border-radius:2px; }
-
-  .comp-h { font-family:'Montserrat',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--fendi); }
-
-  /* MODE TOGGLE */
-  .mode-toggle { display:flex; border:1px solid var(--fendi-border); border-radius:8px; overflow:hidden; }
-  .mode-btn { flex:1; padding:0.6rem 0.5rem; font-family:'Montserrat',sans-serif; font-size:0.72rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; border:none; background:var(--email-light); color:var(--email-dark); cursor:pointer; transition:all 0.18s; }
-  .mode-btn.active { background:var(--black); color:var(--fendi-light); }
-
-  /* UPLOAD AREA */
-  .upload-zone { border:2px dashed var(--fendi-border); border-radius:10px; padding:2rem 1.2rem; text-align:center; cursor:pointer; transition:all 0.22s; position:relative; background:var(--email-light); }
-  .upload-zone:hover, .upload-zone.dragover { border-color:var(--fendi); background:var(--fendi-dim); }
-  .upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
-  .upload-icon { font-size:1.8rem; margin-bottom:0.6rem; }
-  .upload-text { font-size:0.78rem; color:var(--email-dark); line-height:1.6; }
-  .upload-text strong { color:var(--fendi); }
-  .file-card { display:none; align-items:center; gap:0.75rem; background:var(--fendi-light); border:1px solid var(--fendi-border); border-radius:8px; padding:0.75rem 0.9rem; }
-  .file-card.show { display:flex; }
-  .fc-name { font-size:0.79rem; color:var(--dark-gray); font-weight:700; margin-bottom:1px; }
-  .fc-size { font-size:0.69rem; color:var(--email-dark); }
-
-  /* TEXT AREA */
-  .text-input-area { display:flex; flex-direction:column; gap:0.4rem; }
-  .manual-textarea {
-    width:100%;
-    height:240px;
-    background:var(--email-light);
-    border:1px solid var(--fendi-border);
-    border-radius:10px;
-    padding:1rem;
-    font-family:'Lato',sans-serif;
-    font-size:0.83rem;
-    color:var(--dark-gray);
-    resize:vertical;
-    outline:none;
-    line-height:1.65;
-    transition:border-color 0.18s;
+  .debug-panel.show { display:block; }
+  .debug-row { display:flex; align-items:center; gap:8px; margin-top:0.3rem; }
+  .debug-toggle-btn {
+    background:none; border:1px solid #2a3a2a; color:#4a7a4a;
+    font-size:0.62rem; font-family:'Courier New',monospace;
+    padding:2px 8px; border-radius:4px; cursor:pointer;
+    transition:all 0.15s;
   }
-  .manual-textarea:focus { border-color:var(--fendi); }
-  .manual-textarea::placeholder { color:var(--email-dark); }
-  .char-count { font-size:0.68rem; color:var(--email-dark); text-align:right; }
+  .debug-toggle-btn:hover { border-color:var(--fendi); color:var(--fendi); }
 
-  /* hidden/visible sections */
-  .section-upload { display:flex; flex-direction:column; gap:0.75rem; }
-  .section-text   { display:none;  flex-direction:column; gap:0.75rem; }
-  .section-upload.visible { display:flex; }
-  .section-text.visible   { display:flex; }
-
-  .analyze-btn { width:100%; padding:0.83rem; background:var(--black); color:var(--fendi-light); border:none; border-radius:8px; font-family:'Montserrat',sans-serif; font-size:0.74rem; font-weight:700; letter-spacing:0.1em; cursor:pointer; transition:all 0.18s; text-transform:uppercase; }
-  .analyze-btn:hover { background:var(--dark-gray); }
-  .analyze-btn:disabled { opacity:0.3; cursor:not-allowed; }
-
-  .criteria-box { background:var(--email-light); border-radius:8px; padding:0.9rem 1.1rem; }
-  .criteria-title { font-family:'Montserrat',sans-serif; font-size:0.63rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--dark-gray); margin-bottom:0.7rem; }
-  .criteria-item { font-size:0.76rem; color:var(--email-dark); line-height:2; display:flex; align-items:center; gap:7px; }
-  .cdot { width:4px; height:4px; border-radius:50%; background:var(--fendi); flex-shrink:0; }
-
-  /* RESULT */
-  .result-placeholder { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--email-dark); text-align:center; gap:1rem; }
-  .rp-icon { font-size:2.5rem; opacity:0.3; }
-  .rp-text { font-size:0.82rem; line-height:1.7; }
-  .loading { display:none; flex-direction:column; align-items:center; justify-content:center; gap:1rem; padding:4rem 2rem; }
-  .loading.show { display:flex; }
-  .loading-ring { width:36px; height:36px; border:2px solid var(--fendi-border); border-top-color:var(--fendi); border-radius:50%; animation:spin 0.9s linear infinite; }
+  /* loading ring */
   @keyframes spin { to{transform:rotate(360deg)} }
-  .loading-text { font-size:0.78rem; color:var(--email-dark); }
-  .analysis-result { display:none; flex-direction:column; gap:1rem; }
-  .analysis-result.show { display:flex; }
-  .rcard { background:var(--white); border:1px solid var(--fendi-border); border-radius:10px; padding:1.2rem; }
-  .rcard-label { font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--email-dark); margin-bottom:0.9rem; }
-  #aiAnalysis { font-size:0.83rem; line-height:1.8; color:var(--dark-gray); }
+  .loading-ring { width:28px; height:28px; border:2px solid var(--fendi-border); border-top-color:var(--fendi); border-radius:50%; animation:spin 0.9s linear infinite; }
 
-  /* ── UPLOAD DOCS PANEL ── */
-  .upload-panel { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+  /* UPLOAD PANEL */
   .up-header { padding:1.5rem 2rem; background:var(--white); border-bottom:1px solid var(--fendi-border); flex-shrink:0; }
   .up-title { font-family:'Montserrat',sans-serif; font-size:0.85rem; font-weight:600; color:var(--dark-gray); margin-bottom:2px; }
   .up-sub { font-size:0.75rem; color:var(--email-dark); }
   .up-body { flex:1; overflow-y:auto; padding:2rem; display:flex; flex-direction:column; gap:1.25rem; max-width:700px; }
-
   .up-drop { border:2px dashed var(--fendi-border); border-radius:12px; padding:3rem 2rem; text-align:center; cursor:pointer; transition:all 0.22s; position:relative; background:var(--email-light); }
   .up-drop:hover, .up-drop.dragover { border-color:var(--fendi); background:var(--fendi-dim); }
   .up-drop input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
   .up-drop-icon { font-size:2.5rem; margin-bottom:0.75rem; }
   .up-drop-text { font-size:0.85rem; color:var(--email-dark); line-height:1.7; }
   .up-drop-text strong { color:var(--fendi); }
-
   .up-queue { display:flex; flex-direction:column; gap:0.6rem; }
   .up-file-row { display:flex; align-items:center; gap:0.875rem; background:var(--white); border:1px solid var(--fendi-border); border-radius:8px; padding:0.8rem 1rem; }
   .up-file-icon { font-size:1.3rem; flex-shrink:0; }
@@ -199,96 +120,60 @@
   .up-file-name { font-size:0.82rem; font-weight:700; color:var(--dark-gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .up-file-size { font-size:0.71rem; color:var(--email-dark); margin-top:2px; }
   .up-file-status { font-family:'Montserrat',sans-serif; font-size:0.62rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:0.2rem 0.6rem; border-radius:4px; flex-shrink:0; }
-  .status-wait   { background:var(--email-light); color:var(--email-dark); border:1px solid var(--fendi-border); }
-  .status-send   { background:#ece9ff; color:#6b5fa0; border:1px solid #ccc8ee; }
-  .status-ok     { background:#eef5f0; color:#5a8a6a; border:1px solid #c0dac8; }
-  .status-err    { background:#fdf0f0; color:#b05a5a; border:1px solid #f0c0c0; }
-
+  .status-wait { background:var(--email-light); color:var(--email-dark); border:1px solid var(--fendi-border); }
+  .status-send { background:#ece9ff; color:#6b5fa0; border:1px solid #ccc8ee; }
+  .status-ok   { background:#eef5f0; color:#5a8a6a; border:1px solid #c0dac8; }
+  .status-err  { background:#fdf0f0; color:#b05a5a; border:1px solid #f0c0c0; }
   .up-remove { background:none; border:none; color:var(--email-dark); cursor:pointer; font-size:1rem; padding:0.2rem; transition:color 0.16s; flex-shrink:0; }
   .up-remove:hover { color:#b05a5a; }
-
   .up-actions { display:flex; gap:0.75rem; }
   .up-send-btn { flex:1; padding:0.83rem; background:var(--black); color:var(--fendi-light); border:none; border-radius:8px; font-family:'Montserrat',sans-serif; font-size:0.74rem; font-weight:700; letter-spacing:0.1em; cursor:pointer; transition:all 0.18s; text-transform:uppercase; }
   .up-send-btn:hover { background:var(--dark-gray); }
   .up-send-btn:disabled { opacity:0.3; cursor:not-allowed; }
   .up-clear-btn { padding:0.83rem 1.2rem; background:none; border:1px solid var(--fendi-border); color:var(--fendi); border-radius:8px; font-family:'Montserrat',sans-serif; font-size:0.74rem; font-weight:600; cursor:pointer; transition:all 0.18s; }
   .up-clear-btn:hover { background:var(--fendi-dim); }
-
   .up-tip { background:var(--fendi-dim); border:1px solid var(--fendi-border); border-radius:8px; padding:0.85rem 1rem; font-size:0.77rem; color:var(--fendi); line-height:1.6; }
   .up-result-msg { padding:0.75rem 1rem; border-radius:8px; font-size:0.8rem; display:none; }
   .up-result-msg.ok  { background:#eef5f0; color:#5a8a6a; border:1px solid #c0dac8; display:block; }
   .up-result-msg.err { background:#fdf0f0; color:#b05a5a; border:1px solid #f0c0c0; display:block; }
+  .up-warn { background:#fff8e6; border:1px solid #f0d080; border-radius:8px; padding:0.85rem 1rem; font-size:0.77rem; color:#8a7020; line-height:1.6; }
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════
-     LOGIN SCREEN  (shown before auth)
-════════════════════════════════════════════════ -->
+<!-- ══ LOGIN SCREEN ══ -->
 <div id="loginScreen" style="
-  position:fixed;inset:0;z-index:9999;
-  background:var(--black);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Lato',sans-serif;
-">
-  <div style="
-    background:#111;
-    border:1px solid rgba(157,136,109,0.25);
-    border-radius:16px;
-    padding:3rem 2.5rem;
-    width:100%;max-width:400px;
-    text-align:center;
-    display:flex;flex-direction:column;gap:1.5rem;
-  ">
-    <!-- Logo -->
+  position:fixed;inset:0;z-index:9999;background:var(--black);
+  display:flex;align-items:center;justify-content:center;font-family:'Lato',sans-serif;">
+  <div style="background:#111;border:1px solid rgba(157,136,109,0.25);border-radius:16px;
+    padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;
+    display:flex;flex-direction:column;gap:1.5rem;">
     <div>
       <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:2rem;color:var(--fendi-light);letter-spacing:0.12em;">BCA</div>
       <div style="font-size:0.7rem;color:var(--email-dark);letter-spacing:0.2em;text-transform:uppercase;margin-top:4px;">Barbur Carneiro Advogados</div>
     </div>
-
     <div style="width:48px;height:1px;background:rgba(157,136,109,0.3);margin:0 auto;"></div>
-
     <div>
       <div style="font-family:'Montserrat',sans-serif;font-size:0.88rem;font-weight:600;color:var(--fendi-light);margin-bottom:0.5rem;">Assistente Jurídico</div>
       <div style="font-size:0.78rem;color:var(--email-dark);line-height:1.6;">Acesso restrito à equipe BCA.<br>Faça login com sua conta Google corporativa.</div>
     </div>
-
-    <!-- Google login button -->
     <button id="loginBtn" onclick="loginWithGoogle()" style="
       display:flex;align-items:center;justify-content:center;gap:12px;
-      background:var(--white);color:#444;
-      border:none;border-radius:10px;
-      padding:0.875rem 1.5rem;
-      font-family:'Montserrat',sans-serif;font-size:0.8rem;font-weight:600;
-      cursor:pointer;transition:all 0.2s;letter-spacing:0.04em;
-      width:100%;
-    "
-    onmouseover="this.style.background='var(--fendi-light)'"
-    onmouseout="this.style.background='var(--white)'">
+      background:var(--white);color:#444;border:none;border-radius:10px;
+      padding:0.875rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.8rem;
+      font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.04em;width:100%;"
+      onmouseover="this.style.background='var(--fendi-light)'"
+      onmouseout="this.style.background='var(--white)'">
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
       Entrar com Google
     </button>
-
-    <!-- Error message -->
-    <div id="loginError" style="
-      display:none;
-      background:#2a1010;border:1px solid #6b2020;
-      border-radius:8px;padding:0.75rem 1rem;
-      font-size:0.78rem;color:#f08080;line-height:1.5;
-    "></div>
-
-    <!-- Loading state -->
-    <div id="loginLoading" style="display:none;color:var(--email-dark);font-size:0.78rem;">
-      Verificando acesso...
-    </div>
-
-    <div style="font-size:0.68rem;color:#555;line-height:1.6;">
-      🔒 Apenas contas @barburcarneiro.com.br<br>têm acesso a esta ferramenta.
-    </div>
+    <div id="loginError" style="display:none;background:#2a1010;border:1px solid #6b2020;border-radius:8px;padding:0.75rem 1rem;font-size:0.78rem;color:#f08080;line-height:1.5;white-space:pre-line;"></div>
+    <div id="loginLoading" style="display:none;color:var(--email-dark);font-size:0.78rem;">Verificando acesso...</div>
+    <div style="font-size:0.68rem;color:#555;line-height:1.6;">🔒 Apenas contas @barburcarneiro.com.br<br>têm acesso a esta ferramenta.</div>
   </div>
 </div>
 
-<!-- APP (hidden until auth) -->
+<!-- ══ APP ══ -->
 <div id="appContent" style="display:none;flex-direction:column;height:100vh;">
 
 <div class="topbar">
@@ -303,20 +188,15 @@
     &nbsp;·&nbsp;
     <span id="userEmail" style="font-size:0.7rem;">—</span>
     <button onclick="logout()" style="
-      margin-left:0.75rem;background:none;border:1px solid #333;
-      color:var(--email-dark);border-radius:5px;padding:0.25rem 0.6rem;
-      font-size:0.65rem;cursor:pointer;font-family:'Lato',sans-serif;
-      transition:all 0.18s;letter-spacing:0.05em;
-    "
-    onmouseover="this.style.borderColor='var(--fendi)';this.style.color='var(--fendi)'"
-    onmouseout="this.style.borderColor='#333';this.style.color='var(--email-dark)'"
-    >Sair</button>
+      margin-left:0.75rem;background:none;border:1px solid #333;color:var(--email-dark);
+      border-radius:5px;padding:0.25rem 0.6rem;font-size:0.65rem;cursor:pointer;
+      font-family:'Lato',sans-serif;transition:all 0.18s;letter-spacing:0.05em;"
+      onmouseover="this.style.borderColor='var(--fendi)';this.style.color='var(--fendi)'"
+      onmouseout="this.style.borderColor='#333';this.style.color='var(--email-dark)'">Sair</button>
   </div>
 </div>
 
 <div class="main">
-
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sb-section">
       <div class="sb-label">Ferramentas</div>
@@ -328,11 +208,10 @@
       <div class="nav-item" onclick="switchTab('upload-docs',this)"><span class="nav-icon">📥</span> Adicionar Documentos</div>
     </div>
     <div class="sb-footer">
-      <div class="sb-footer-text">🔒 Processamento 100% local<br>Documentos nunca saem do escritório</div>
+      <div class="sb-footer-text">🔒 Dados processados via<br>Gemini + Supabase BCA</div>
     </div>
   </div>
 
-  <!-- CONTENT -->
   <div class="content">
     <div class="tabs">
       <div class="tab active" id="tab-chat" onclick="switchPanel('chat')">Chat Jurídico</div>
@@ -340,7 +219,7 @@
       <div class="tab" id="tab-upload-docs" onclick="switchPanel('upload-docs')">Adicionar Documentos</div>
     </div>
 
-    <!-- ── CHAT ── -->
+    <!-- ══ CHAT ══ -->
     <div class="panel active" id="panel-chat">
       <div class="chat-messages" id="chatMessages">
         <div class="message">
@@ -348,7 +227,7 @@
           <div>
             <div class="msg-bubble">
               <div class="welcome-h">Assistente Jurídico BCA</div>
-              <div style="font-size:0.84rem;color:var(--email-dark);line-height:1.7">Olá! Estou conectado à base de conhecimento do escritório. Faça sua consulta jurídica abaixo.</div>
+              <div style="font-size:0.84rem;color:var(--email-dark);line-height:1.7">Olá! Estou conectado à base de conhecimento do escritório via Gemini + RAG. Faça sua consulta jurídica abaixo.</div>
               <div class="chips">
                 <div class="chip" onclick="useChip(this)">Quais são as penalidades do Código de Ética BCA?</div>
                 <div class="chip" onclick="useChip(this)">Como funciona o conflito de interesses no BCA?</div>
@@ -356,40 +235,40 @@
                 <div class="chip" onclick="useChip(this)">Como funciona o canal de denúncias?</div>
               </div>
             </div>
-            <div class="msg-source">📄 Conectado ao AnythingLLM · Base de Conhecimento BCA</div>
+            <div class="msg-source">🤖 Gemini · Base de Conhecimento BCA</div>
           </div>
         </div>
       </div>
       <div class="chat-input-area">
         <div class="input-wrap">
-          <textarea class="chat-input" id="chatInput" placeholder="Digite sua consulta jurídica..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <textarea class="chat-input" id="chatInput" placeholder="Digite sua consulta jurídica..." rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
           <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
         </div>
         <div class="error-banner" id="errorBanner"></div>
+        <!-- DEBUG: visível apenas em modo debug -->
+        <div id="debugRow" class="debug-row" style="display:none;">
+          <button class="debug-toggle-btn" onclick="toggleDebug()">🔍 ver resposta bruta</button>
+          <span id="debugStatus" style="font-size:0.62rem;color:var(--email-dark);"></span>
+        </div>
+        <pre id="debugPanel" class="debug-panel"></pre>
       </div>
     </div>
 
-    <!-- ── COMPARADOR ── -->
+    <!-- ══ COMPARADOR ══ -->
     <div class="panel" id="panel-comparador">
       <div style="display:flex;flex:1;overflow:hidden;">
 
-        <!-- LEFT: inputs -->
+        <!-- LEFT -->
         <div style="width:420px;flex-shrink:0;background:var(--white);border-right:1px solid var(--fendi-border);overflow-y:auto;padding:1.5rem;">
-
           <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--fendi);margin-bottom:1rem;">
             📤 Documento para Análise
           </div>
-
-          <!-- TAB TOGGLE -->
           <div style="display:flex;border:1px solid var(--fendi-border);border-radius:8px;overflow:hidden;margin-bottom:1.25rem;">
-            <button id="btnUpload"
-              onclick="setMode('upload')"
-              style="flex:1;padding:0.62rem;font-family:'Montserrat',sans-serif;font-size:0.71rem;font-weight:700;letter-spacing:0.05em;border:none;cursor:pointer;transition:all 0.18s;background:var(--black);color:var(--fendi-light);">
+            <button id="btnUpload" onclick="setMode('upload')" style="flex:1;padding:0.62rem;font-family:'Montserrat',sans-serif;font-size:0.71rem;font-weight:700;letter-spacing:0.05em;border:none;cursor:pointer;transition:all 0.18s;background:var(--black);color:var(--fendi-light);">
               📄 &nbsp;Upload de Arquivo
             </button>
-            <button id="btnText"
-              onclick="setMode('text')"
-              style="flex:1;padding:0.62rem;font-family:'Montserrat',sans-serif;font-size:0.71rem;font-weight:700;letter-spacing:0.05em;border:none;cursor:pointer;transition:all 0.18s;background:var(--email-light);color:var(--email-dark);">
+            <button id="btnText" onclick="setMode('text')" style="flex:1;padding:0.62rem;font-family:'Montserrat',sans-serif;font-size:0.71rem;font-weight:700;letter-spacing:0.05em;border:none;cursor:pointer;transition:all 0.18s;background:var(--email-light);color:var(--email-dark);">
               ✏️ &nbsp;Inserir Texto
             </button>
           </div>
@@ -397,12 +276,11 @@
           <!-- UPLOAD AREA -->
           <div id="areaUpload">
             <div id="uploadZone" style="border:2px dashed var(--fendi-border);border-radius:10px;padding:2rem 1.2rem;text-align:center;cursor:pointer;transition:all 0.22s;position:relative;background:var(--email-light);margin-bottom:0.75rem;">
-              <input type="file" accept=".pdf,.doc,.docx" onchange="handleFile(this)"
-                style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" />
+              <input type="file" accept=".pdf,.doc,.docx,.txt" onchange="handleFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;" />
               <div style="font-size:1.8rem;margin-bottom:0.5rem;">📄</div>
               <div style="font-size:0.78rem;color:var(--email-dark);line-height:1.6;">
                 <strong style="color:var(--fendi);">Clique para selecionar</strong> ou arraste aqui<br><br>
-                PDF &nbsp;·&nbsp; DOC &nbsp;·&nbsp; DOCX
+                TXT &nbsp;·&nbsp; PDF &nbsp;·&nbsp; DOC &nbsp;·&nbsp; DOCX
               </div>
             </div>
             <div id="fileCard" style="display:none;align-items:center;gap:0.75rem;background:var(--fendi-light);border:1px solid var(--fendi-border);border-radius:8px;padding:0.75rem 0.9rem;margin-bottom:0.75rem;">
@@ -412,9 +290,13 @@
                 <div id="fileSize" style="font-size:0.69rem;color:var(--email-dark);">—</div>
               </div>
             </div>
+            <!-- Aviso sobre PDF -->
+            <div id="pdfWarning" style="display:none;background:#fff8e6;border:1px solid #f0d080;border-radius:8px;padding:0.75rem 1rem;font-size:0.75rem;color:#8a7020;margin-bottom:0.75rem;line-height:1.6;">
+              ⚠️ <strong>PDF/DOC detectado:</strong> O arquivo será lido como texto bruto. Para melhores resultados, use arquivos <strong>.txt</strong> ou copie o texto na aba "Inserir Texto".
+            </div>
           </div>
 
-          <!-- TEXT AREA — always rendered, toggled via display -->
+          <!-- TEXT AREA -->
           <div id="areaText" style="display:none;flex-direction:column;gap:0.4rem;">
             <textarea id="manualText"
               placeholder="Cole ou digite aqui a cláusula ou o texto do contrato que deseja comparar com os padrões BCA..."
@@ -426,27 +308,24 @@
             <div id="charCount" style="font-size:0.68rem;color:var(--email-dark);text-align:right;">0 caracteres</div>
           </div>
 
-          <!-- ANALYZE BTN -->
           <button id="analyzeBtn" onclick="analyzeContract()" disabled
-            style="width:100%;padding:0.83rem;background:var(--black);color:var(--fendi-light);border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:0.74rem;font-weight:700;letter-spacing:0.1em;cursor:pointer;transition:all 0.18s;text-transform:uppercase;margin-top:1rem;margin-bottom:1.25rem;opacity:0.3;">
+            style="width:100%;padding:0.83rem;background:var(--black);color:var(--fendi-light);border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:0.74rem;font-weight:700;letter-spacing:0.1em;cursor:not-allowed;transition:all 0.18s;text-transform:uppercase;margin-top:1rem;margin-bottom:1.25rem;opacity:0.3;">
             Buscar Cláusulas Similares e Comparar
           </button>
 
-          <!-- CRITERIA -->
           <div style="background:var(--email-light);border-radius:8px;padding:0.9rem 1.1rem;">
             <div style="font-family:'Montserrat',sans-serif;font-size:0.63rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--dark-gray);margin-bottom:0.7rem;">Como funciona</div>
-            <div style="font-size:0.76rem;color:var(--email-dark);line-height:1.9;display:flex;flex-direction:column;gap:0.1rem;">
-              <span>🔍 Busca cláusulas similares nos docs BCA</span>
-              <span>⚖️ Compara redação e termos jurídicos</span>
-              <span>⚠️ Identifica diferenças e riscos</span>
-              <span>💡 Sugere adequações aos padrões BCA</span>
-              <span>✅ Aponta o que já está conforme</span>
+            <div style="font-size:0.76rem;color:var(--email-dark);line-height:1.9;">
+              🔍 Busca cláusulas similares nos docs BCA<br>
+              ⚖️ Compara redação e termos jurídicos<br>
+              ⚠️ Identifica diferenças e riscos<br>
+              💡 Sugere adequações aos padrões BCA<br>
+              ✅ Aponta o que já está conforme
             </div>
           </div>
+        </div>
 
-        </div><!-- /left -->
-
-        <!-- RIGHT: resultado -->
+        <!-- RIGHT -->
         <div style="flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:1.75rem 2rem;">
           <div style="font-family:'Montserrat',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--fendi);margin-bottom:1.25rem;">
             📊 Resultado da Comparação
@@ -462,496 +341,593 @@
           <div id="analysisResult" style="display:none;flex-direction:column;gap:1rem;">
             <div style="background:var(--white);border:1px solid var(--fendi-border);border-radius:10px;padding:1.25rem;">
               <div style="font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--email-dark);margin-bottom:0.9rem;">
-                Análise Comparativa · Cláusulas BCA
+                Análise Comparativa · Cláusulas BCA · Gemini
               </div>
               <div id="aiAnalysis" style="font-size:0.83rem;line-height:1.85;color:var(--dark-gray);"></div>
             </div>
           </div>
         </div>
-
       </div>
-    </div><!-- /panel-comparador -->
+    </div>
 
-    <!-- ── ADICIONAR DOCUMENTOS ── -->
+    <!-- ══ UPLOAD DOCS ══ -->
     <div class="panel" id="panel-upload-docs">
-      <div class="upload-panel">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
         <div class="up-header">
           <div class="up-title">Adicionar Documentos à Base de Conhecimento</div>
-          <div class="up-sub">Envie documentos para o AnythingLLM — ficam disponíveis imediatamente para consulta no Chat Jurídico</div>
+          <div class="up-sub">Envie documentos para indexação via Gemini Embeddings — ficam disponíveis no Chat Jurídico</div>
         </div>
         <div class="up-body">
+          <div class="up-warn">
+            ⚠️ <strong>Formatos recomendados: .txt</strong><br>
+            Arquivos PDF e DOC/DOCX contêm bytes binários que não podem ser lidos diretamente pelo navegador como texto. Para indexar corretamente, converta para <strong>.txt</strong> primeiro (copie e cole o conteúdo em um editor de texto e salve como .txt).
+          </div>
 
           <div class="up-drop" id="upDrop">
-            <input type="file" id="upFileInput" accept=".pdf,.doc,.docx" multiple onchange="addToQueue(this.files)" />
+            <input type="file" id="upFileInput" accept=".txt,.pdf,.doc,.docx" multiple onchange="addToQueue(this.files)" />
             <div class="up-drop-icon">📁</div>
             <div class="up-drop-text">
               <strong>Clique para selecionar</strong> ou arraste os arquivos aqui<br>
-              PDF &nbsp;·&nbsp; DOC &nbsp;·&nbsp; DOCX &nbsp;·&nbsp; Múltiplos arquivos permitidos
+              TXT (recomendado) &nbsp;·&nbsp; PDF &nbsp;·&nbsp; DOC &nbsp;·&nbsp; DOCX
             </div>
           </div>
 
           <div class="up-queue" id="upQueue" style="display:none"></div>
-
           <div class="up-actions" id="upActions" style="display:none">
-            <button class="up-send-btn" id="upSendBtn" onclick="sendToAnythingLLM()">
+            <button class="up-send-btn" id="upSendBtn" onclick="sendToSupabase()">
               Enviar para Base de Conhecimento
             </button>
             <button class="up-clear-btn" onclick="clearQueue()">Limpar</button>
           </div>
-
           <div class="up-result-msg" id="upResultMsg"></div>
-
           <div class="up-tip">
-            💡 Após o envio, aguarde alguns segundos para o AnythingLLM processar e indexar os documentos. Em seguida, eles estarão disponíveis para consulta no <strong>Chat Jurídico</strong>.
+            💡 Após o envio, os documentos são fragmentados em chunks, vetorizados com Gemini Embeddings e salvos no Supabase pgvector. Em seguida, ficam disponíveis para consulta no <strong>Chat Jurídico</strong>.
           </div>
-
         </div>
       </div>
     </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
+</div><!-- /appContent -->
 
 <script>
-  // ── CONFIG ──────────────────────────────────────────
-  const SUPABASE_FUNCTIONS = 'https://hnhfbjuedesmkxrmmfan.supabase.co/functions/v1';
-  const ANON_KEY           = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaGZianVlZGVzbWt4cm1tZmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTcwMzYsImV4cCI6MjA4ODU3MzAzNn0.MemLsn-_uLOlo7YpK0u7ulRxuvMVHMIUJyKNv20jocY';
-  // ────────────────────────────────────────────────────
+// ══════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ══════════════════════════════════════════════
+const SUPABASE_URL       = 'https://hnhfbjuedesmkxrmmfan.supabase.co';
+const SUPABASE_ANON_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaGZianVlZGVzbWt4cm1tZmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTcwMzYsImV4cCI6MjA4ODU3MzAzNn0.MemLsn-_uLOlo7YpK0u7ulRxuvMVHMIUJyKNv20jocY';
+const FUNCTIONS_URL      = `${SUPABASE_URL}/functions/v1`;
+const ALLOWED_DOMAIN     = '@barburcarneiro.com.br';
+const SESSION_KEY        = 'bca_session';
 
-  // Testa conexão com Edge Function ao carregar
-  async function checkAnythingLLM() {
+let debugMode = false;
+
+// ══════════════════════════════════════════════
+// SESSÃO — persiste em sessionStorage
+// ══════════════════════════════════════════════
+function saveSession(token, email) {
+  try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ token, email })); } catch(e) {}
+}
+function loadSession() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch(e) { return null; }
+}
+function clearSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {}
+}
+
+// ══════════════════════════════════════════════
+// CHAMADA À EDGE FUNCTION — FIX PRINCIPAL
+// ══════════════════════════════════════════════
+async function callEdgeFunction(fnName, body) {
+  const session = loadSession();
+
+  // Monta headers — usa token do usuário se disponível, senão anon key
+  // JWT está desabilitado no Supabase, mas mantemos o header por boa prática
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_ANON_KEY,
+  };
+  if (session?.token) {
+    headers['Authorization'] = `Bearer ${session.token}`;
+  } else {
+    headers['Authorization'] = `Bearer ${SUPABASE_ANON_KEY}`;
+  }
+
+  const res = await fetch(`${FUNCTIONS_URL}/${fnName}`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(body),
+  });
+
+  // Captura o texto bruto para debug ANTES de parsear
+  const rawText = await res.text();
+
+  // Salva para debug
+  window._lastRawResponse = rawText;
+  window._lastStatus = res.status;
+
+  if (!res.ok) {
+    // Tenta extrair mensagem de erro do JSON
+    let errMsg = `HTTP ${res.status}`;
     try {
-      const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-chat`, {
-        method: 'OPTIONS',
-        signal: AbortSignal.timeout(4000)
-      });
-      document.getElementById('llmStatus').innerHTML = '🟢 &nbsp;Gemini Conectado';
-      document.getElementById('llmStatus').style.color = '#7ab87a';
-    } catch {
-      document.getElementById('llmStatus').innerHTML = '🔴 &nbsp;IA Indisponível';
-      document.getElementById('llmStatus').style.color = '#d07a7a';
+      const errData = JSON.parse(rawText);
+      errMsg = errData.error || errData.message || errMsg;
+    } catch(e) {
+      errMsg = `${errMsg}: ${rawText.slice(0, 200)}`;
     }
+    throw new Error(errMsg);
   }
 
-  function setOffline() {
-    document.getElementById('llmStatus').innerHTML = '🔴 &nbsp;IA Indisponível';
-    document.getElementById('llmStatus').style.color = '#d07a7a';
+  // Parse JSON
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch(e) {
+    throw new Error(`Resposta inválida (não é JSON): ${rawText.slice(0, 200)}`);
   }
 
-  async function callGemini(message, mode = 'chat') {
-    const token = window._authToken || ANON_KEY;
-    const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ message, mode })
-    });
-    if (!res.ok) throw new Error(`Erro ${res.status}: ${res.statusText}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data.response;
+  if (data.error) throw new Error(data.error);
+
+  // FIX: extrai o campo correto — a Edge Function retorna { response: "..." }
+  // Aceita também outros campos por segurança
+  const reply = data.response ?? data.text ?? data.answer ?? data.content ?? data.result;
+  if (!reply) {
+    // Lança erro descritivo mostrando o que chegou
+    throw new Error(`Campo 'response' não encontrado. Estrutura recebida: ${JSON.stringify(Object.keys(data))}`);
   }
 
-  async function embedDocument(texto, nome_arquivo, tipo = 'documento') {
-    const token = window._authToken || ANON_KEY;
-    const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-embed`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ texto, nome_arquivo, tipo })
-    });
-    if (!res.ok) throw new Error(`Erro ${res.status}`);
-    return await res.json();
+  return reply;
+}
+
+// ══════════════════════════════════════════════
+// VERIFICAÇÃO DE CONEXÃO — usa POST, não OPTIONS
+// ══════════════════════════════════════════════
+async function checkConnection() {
+  const statusEl = document.getElementById('llmStatus');
+  statusEl.innerHTML = '⏳ Verificando IA...';
+  statusEl.style.color = '';
+  try {
+    // Envia uma pergunta mínima para testar a função real
+    const reply = await callEdgeFunction('bca-chat', { message: 'ping', mode: 'chat' });
+    statusEl.innerHTML = '🟢 &nbsp;Gemini Conectado';
+    statusEl.style.color = '#7ab87a';
+  } catch(err) {
+    statusEl.innerHTML = '🔴 &nbsp;IA Indisponível';
+    statusEl.style.color = '#d07a7a';
+    console.warn('[BCA] checkConnection falhou:', err.message);
   }
+}
 
-  // ── NAV ──────────────────────────────────────────────
-  function switchPanel(p) {
-    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.getElementById('panel-' + p).classList.add('active');
-    document.getElementById('tab-'   + p).classList.add('active');
+// ══════════════════════════════════════════════
+// NAVEGAÇÃO
+// ══════════════════════════════════════════════
+function switchPanel(p) {
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.getElementById('panel-' + p).classList.add('active');
+  document.getElementById('tab-'   + p).classList.add('active');
+}
+function switchTab(p, el) {
+  switchPanel(p);
+  document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════════
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+function useChip(el) {
+  document.getElementById('chatInput').value = el.textContent.trim();
+  sendMessage();
+}
+function showError(msg) {
+  const b = document.getElementById('errorBanner');
+  b.textContent = '⚠️ ' + msg;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 8000);
+}
+function toggleDebug() {
+  const panel = document.getElementById('debugPanel');
+  const status = document.getElementById('debugStatus');
+  if (panel.classList.contains('show')) {
+    panel.classList.remove('show');
+    return;
   }
-  function switchTab(p, el) {
-    switchPanel(p);
-    document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-    el.classList.add('active');
+  const raw = window._lastRawResponse || '(sem dados ainda)';
+  const st  = window._lastStatus || '—';
+  panel.textContent = `HTTP ${st}\n\n${raw}`;
+  panel.classList.add('show');
+  status.textContent = `HTTP ${st}`;
+}
+
+function addMessage(html, isUser) {
+  const c = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'message' + (isUser ? ' user' : '');
+  const av  = `<div class="msg-av ${isUser ? 'user' : 'ai'}">${isUser ? 'EU' : 'BCA'}</div>`;
+  const bub = `<div class="msg-bubble">${html}</div>`;
+  const src = !isUser ? `<div class="msg-source">🤖 Gemini · Base de Conhecimento BCA</div>` : '';
+  d.innerHTML = isUser ? `${bub}${av}` : `${av}<div>${bub}${src}</div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+}
+
+function addTyping() {
+  const c = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'message'; d.id = 'typing';
+  d.innerHTML = `<div class="msg-av ai">BCA</div><div class="msg-bubble" style="color:var(--email-dark)">Consultando base de conhecimento<span id="dots">.</span></div>`;
+  c.appendChild(d);
+  c.scrollTop = c.scrollHeight;
+  let n = 0;
+  window._dotInterval = setInterval(() => {
+    const el = document.getElementById('dots');
+    if (el) el.textContent = ['.','..','...'][n++ % 3];
+  }, 400);
+}
+function removeTyping() {
+  clearInterval(window._dotInterval);
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+function fmt(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,   '<em>$1</em>')
+    .replace(/\n/g,          '<br>');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage(text, true);
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+  addTyping();
+
+  // Mostra debug row a partir da primeira mensagem
+  document.getElementById('debugRow').style.display = 'flex';
+
+  try {
+    const reply = await callEdgeFunction('bca-chat', { message: text, mode: 'chat' });
+    removeTyping();
+    addMessage(fmt(reply), false);
+
+    // Atualiza debug silenciosamente
+    const panel = document.getElementById('debugPanel');
+    if (panel.classList.contains('show')) toggleDebug(); // refresh
+
+  } catch(err) {
+    removeTyping();
+    // Mostra o erro E o raw response para diagnóstico
+    showError(err.message);
+    const panel = document.getElementById('debugPanel');
+    const raw = window._lastRawResponse || '(sem resposta)';
+    panel.textContent = `ERRO: ${err.message}\n\nHTTP ${window._lastStatus || '?'}\n\nResposta bruta:\n${raw}`;
+    panel.classList.add('show');
+    document.getElementById('debugRow').style.display = 'flex';
+  } finally {
+    document.getElementById('sendBtn').disabled = false;
   }
+}
 
-  // ── CHAT ─────────────────────────────────────────────
-  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-  function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
-  function useChip(el) { document.getElementById('chatInput').value = el.textContent; sendMessage(); }
+// ══════════════════════════════════════════════
+// COMPARADOR
+// ══════════════════════════════════════════════
+let currentMode = 'upload';
 
-  function showError(msg) {
-    const b = document.getElementById('errorBanner');
-    b.textContent = '⚠️ ' + msg; b.classList.add('show');
-    setTimeout(() => b.classList.remove('show'), 6000);
+function setMode(mode) {
+  currentMode = mode;
+  const btnUp = document.getElementById('btnUpload');
+  const btnTx = document.getElementById('btnText');
+  const aUp   = document.getElementById('areaUpload');
+  const aTx   = document.getElementById('areaText');
+  if (mode === 'upload') {
+    btnUp.style.background = 'var(--black)'; btnUp.style.color = 'var(--fendi-light)';
+    btnTx.style.background = 'var(--email-light)'; btnTx.style.color = 'var(--email-dark)';
+    aUp.style.display = 'block'; aTx.style.display = 'none';
+  } else {
+    btnTx.style.background = 'var(--black)'; btnTx.style.color = 'var(--fendi-light)';
+    btnUp.style.background = 'var(--email-light)'; btnUp.style.color = 'var(--email-dark)';
+    aTx.style.display = 'flex'; aUp.style.display = 'none';
+    document.getElementById('manualText').focus();
   }
+  checkReady();
+}
 
-  function addMessage(html, isUser) {
-    const c = document.getElementById('chatMessages');
-    const d = document.createElement('div');
-    d.className = 'message' + (isUser ? ' user' : '');
-    const av  = `<div class="msg-av ${isUser ? 'user' : 'ai'}">${isUser ? 'EU' : 'BCA'}</div>`;
-    const bub = `<div class="msg-bubble">${html}</div>`;
-    const src = !isUser ? `<div class="msg-source">📄 Baseado na documentação BCA via AnythingLLM</div>` : '';
-    d.innerHTML = isUser ? `${bub}${av}` : `${av}<div>${bub}${src}</div>`;
-    c.appendChild(d); c.scrollTop = c.scrollHeight;
-  }
+function onManualInput() {
+  const v = document.getElementById('manualText').value;
+  document.getElementById('charCount').textContent = v.length.toLocaleString('pt-BR') + ' caracteres';
+  checkReady();
+}
 
-  function addTyping() {
-    const c = document.getElementById('chatMessages');
-    const d = document.createElement('div');
-    d.className = 'message'; d.id = 'typing';
-    d.innerHTML = `<div class="msg-av ai">BCA</div><div class="msg-bubble" style="color:var(--email-dark)">Consultando base de conhecimento<span id="dots">.</span></div>`;
-    c.appendChild(d); c.scrollTop = c.scrollHeight;
-    let n = 0;
-    window._di = setInterval(() => { const el = document.getElementById('dots'); if (el) el.textContent = ['.', '..', '...'][n++ % 3]; }, 400);
-  }
+function checkReady() {
+  let ok = false;
+  if (currentMode === 'upload') ok = !!window._contractFile;
+  if (currentMode === 'text')   ok = document.getElementById('manualText').value.trim().length > 20;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.3';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
 
-  function removeTyping() {
-    clearInterval(window._di);
-    const el = document.getElementById('typing');
-    if (el) el.remove();
-  }
+function handleFile(input) {
+  const f = input.files[0]; if (!f) return;
+  window._contractFile = f;
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSize').textContent = (f.size / 1024).toFixed(1) + ' KB';
+  document.getElementById('fileCard').style.display = 'flex';
+  // Aviso para PDF/DOC
+  const isPdfOrDoc = /\.(pdf|doc|docx)$/i.test(f.name);
+  document.getElementById('pdfWarning').style.display = isPdfOrDoc ? 'block' : 'none';
+  checkReady();
+}
 
-  function fmt(text) {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/\n/g, '<br>');
-  }
+// drag-drop comparador
+const uz = document.getElementById('uploadZone');
+uz.addEventListener('dragover',  e => { e.preventDefault(); uz.style.borderColor='var(--fendi)'; uz.style.background='var(--fendi-dim)'; });
+uz.addEventListener('dragleave', ()=> { uz.style.borderColor=''; uz.style.background=''; });
+uz.addEventListener('drop', e => {
+  e.preventDefault(); uz.style.borderColor=''; uz.style.background='';
+  const f = e.dataTransfer.files[0]; if(!f) return;
+  window._contractFile = f;
+  document.getElementById('fileName').textContent = f.name;
+  document.getElementById('fileSize').textContent = (f.size/1024).toFixed(1)+' KB';
+  document.getElementById('fileCard').style.display = 'flex';
+  document.getElementById('pdfWarning').style.display = /\.(pdf|doc|docx)$/i.test(f.name) ? 'block':'none';
+  checkReady();
+});
 
-  async function sendMessage() {
-    const input = document.getElementById('chatInput');
-    const text = input.value.trim(); if (!text) return;
-    addMessage(text, true);
-    input.value = ''; input.style.height = 'auto';
-    document.getElementById('sendBtn').disabled = true;
-    addTyping();
-    try {
-      const reply = await callGemini(text, 'chat');
-      removeTyping();
-      addMessage(fmt(reply), false);
-    } catch (err) {
-      removeTyping();
-      showError(err.message.includes('fetch') ? 'IA indisponível. Tente novamente em instantes.' : 'Erro: ' + err.message);
-    } finally {
-      document.getElementById('sendBtn').disabled = false;
-    }
-  }
+// FIX: lê arquivo como texto (funciona bem para .txt; PDF/DOC terão lixo binário)
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = e => resolve(e.target.result);
+    r.onerror = reject;
+    r.readAsText(file, 'UTF-8');
+  });
+}
 
-  // ── COMPARADOR ───────────────────────────────────────
-  let currentMode = 'upload';
+async function analyzeContract() {
+  const rp = document.getElementById('resultPlaceholder');
+  const ld = document.getElementById('loadingResult');
+  const ar = document.getElementById('analysisResult');
+  rp.style.display = 'none';
+  ar.style.display = 'none';
+  ld.style.display = 'flex';
 
-  function setMode(mode) {
-    currentMode = mode;
-
-    const btnUp = document.getElementById('btnUpload');
-    const btnTx = document.getElementById('btnText');
-    const aUp   = document.getElementById('areaUpload');
-    const aTx   = document.getElementById('areaText');
-
-    if (mode === 'upload') {
-      btnUp.style.background = 'var(--black)';
-      btnUp.style.color      = 'var(--fendi-light)';
-      btnTx.style.background = 'var(--email-light)';
-      btnTx.style.color      = 'var(--email-dark)';
-      aUp.style.display      = 'block';
-      aTx.style.display      = 'none';
+  try {
+    let contractText = '';
+    if (currentMode === 'text') {
+      contractText = document.getElementById('manualText').value.trim();
     } else {
-      btnTx.style.background = 'var(--black)';
-      btnTx.style.color      = 'var(--fendi-light)';
-      btnUp.style.background = 'var(--email-light)';
-      btnUp.style.color      = 'var(--email-dark)';
-      aTx.style.display      = 'flex';
-      aUp.style.display      = 'none';
-      document.getElementById('manualText').focus();
+      contractText = await readFileAsText(window._contractFile);
+      // Limpa possíveis bytes binários de PDF deixando só caracteres legíveis
+      contractText = contractText.replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g, ' ').trim();
     }
-    checkReady();
-  }
 
-  function onManualInput() {
-    const v = document.getElementById('manualText').value;
-    document.getElementById('charCount').textContent = v.length.toLocaleString('pt-BR') + ' caracteres';
-    checkReady();
-  }
+    if (!contractText || contractText.length < 20) {
+      throw new Error('Não foi possível extrair texto legível do arquivo. Use a aba "Inserir Texto" e cole o conteúdo manualmente.');
+    }
 
-  function checkReady() {
-    let ok = false;
-    if (currentMode === 'upload') ok = !!window._contractFile;
-    if (currentMode === 'text')   ok = document.getElementById('manualText').value.trim().length > 20;
-    const btn = document.getElementById('analyzeBtn');
-    btn.disabled = !ok;
-    btn.style.opacity = ok ? '1' : '0.3';
-    btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
-  }
+    // FIX: envia o texto com o prefixo que a Edge Function espera no modo 'comparador'
+    const reply = await callEdgeFunction('bca-chat', {
+      message: `TEXTO FORNECIDO PARA COMPARAÇÃO:\n"""\n${contractText.slice(0, 6000)}\n"""`,
+      mode: 'comparador'
+    });
 
-  function handleFile(input) {
-    const f = input.files[0]; if (!f) return;
-    window._contractFile = f;
-    document.getElementById('fileName').textContent = f.name;
-    document.getElementById('fileSize').textContent = (f.size / 1024).toFixed(1) + ' KB';
-    document.getElementById('fileCard').style.display = 'flex';
-    checkReady();
-  }
+    ld.style.display = 'none';
+    ar.style.display = 'flex';
+    document.getElementById('aiAnalysis').innerHTML = fmt(reply);
 
-  // drag-drop on comparador upload zone
-  const uz = document.getElementById('uploadZone');
-  uz.addEventListener('dragover',  e => { e.preventDefault(); uz.style.borderColor = 'var(--fendi)'; uz.style.background = 'var(--fendi-dim)'; });
-  uz.addEventListener('dragleave', () => { uz.style.borderColor = ''; uz.style.background = ''; });
-  uz.addEventListener('drop', e => {
-    e.preventDefault(); uz.style.borderColor = ''; uz.style.background = '';
-    const f = e.dataTransfer.files[0]; if (!f) return;
-    window._contractFile = f;
-    document.getElementById('fileName').textContent = f.name;
-    document.getElementById('fileSize').textContent = (f.size / 1024).toFixed(1) + ' KB';
-    document.getElementById('fileCard').style.display = 'flex';
-    checkReady();
+  } catch(err) {
+    ld.style.display = 'none';
+    rp.style.display = 'flex';
+    rp.innerHTML = `<div style="font-size:2.5rem;opacity:0.3;">⚖️</div><div style="font-size:0.82rem;color:#b05a5a;line-height:1.7;">Erro: ${err.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════════════
+// UPLOAD DE DOCUMENTOS — FIX: usa readAsText corretamente
+// ══════════════════════════════════════════════
+let uploadQueue = [];
+
+function addToQueue(files) {
+  Array.from(files).forEach(f => {
+    if (!uploadQueue.find(x => x.name === f.name)) uploadQueue.push(f);
   });
+  renderQueue();
+}
 
-  async function analyzeContract() {
-    const rp = document.getElementById('resultPlaceholder');
-    const ld = document.getElementById('loadingResult');
-    const ar = document.getElementById('analysisResult');
-    rp.style.display = 'none';
-    ar.style.display = 'none';
-    ld.style.display = 'flex';
+function renderQueue() {
+  const q = document.getElementById('upQueue');
+  const a = document.getElementById('upActions');
+  if (uploadQueue.length === 0) { q.style.display='none'; a.style.display='none'; return; }
+  q.style.display = 'flex'; a.style.display = 'flex';
+  q.innerHTML = uploadQueue.map((f, i) => `
+    <div class="up-file-row" id="upRow-${i}">
+      <div class="up-file-icon">${f.name.endsWith('.pdf') ? '📕' : '📘'}</div>
+      <div class="up-file-info">
+        <div class="up-file-name" title="${f.name}">${f.name}</div>
+        <div class="up-file-size">${(f.size/1024).toFixed(1)} KB${/\.(pdf|doc|docx)$/i.test(f.name) ? ' &nbsp;<span style="color:#8a7020;font-size:0.65rem;">⚠️ binário</span>':''}</div>
+      </div>
+      <span class="up-file-status status-wait" id="upStatus-${i}">Aguardando</span>
+      <button class="up-remove" onclick="removeFromQueue(${i})" title="Remover">✕</button>
+    </div>`).join('');
+}
+
+function removeFromQueue(i) { uploadQueue.splice(i,1); renderQueue(); }
+function clearQueue() {
+  uploadQueue = [];
+  renderQueue();
+  document.getElementById('upResultMsg').className = 'up-result-msg';
+  document.getElementById('upFileInput').value = '';
+}
+
+async function sendToSupabase() {
+  if (uploadQueue.length === 0) return;
+  const btn = document.getElementById('upSendBtn');
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+  const msg = document.getElementById('upResultMsg');
+  msg.className = 'up-result-msg';
+  let ok=0, fail=0;
+
+  for (let i=0; i<uploadQueue.length; i++) {
+    const f = uploadQueue[i];
+    const statusEl = document.getElementById(`upStatus-${i}`);
+    statusEl.textContent = 'Lendo...';
+    statusEl.className = 'up-file-status status-send';
 
     try {
-      let contractText = '';
-      if (currentMode === 'text') {
-        contractText = document.getElementById('manualText').value.trim();
+      // Lê como texto (funciona bem para .txt)
+      let texto = await readFileAsText(f);
+
+      // Remove bytes binários se for PDF/DOC
+      if (/\.(pdf|doc|docx)$/i.test(f.name)) {
+        texto = texto.replace(/[^\x20-\x7E\xA0-\xFF\n\r\t]/g,' ').replace(/\s{3,}/g,' ').trim();
+      }
+
+      if (!texto || texto.length < 50) {
+        throw new Error('Texto extraído muito curto ou ilegível. Use .txt');
+      }
+
+      statusEl.textContent = 'Vetorizando...';
+
+      const result = await callEdgeFunction('bca-embed', {
+        texto: texto.slice(0, 50000), // limita 50k chars por arquivo
+        nome_arquivo: f.name,
+        tipo: 'documento'
+      });
+
+      const chunks = result?.chunks_salvos ?? result;
+      statusEl.textContent = typeof chunks === 'number' ? `OK ✓ (${chunks} chunks)` : 'Indexado ✓';
+      statusEl.className = 'up-file-status status-ok';
+      ok++;
+    } catch(e) {
+      statusEl.textContent = 'Erro ✕';
+      statusEl.className = 'up-file-status status-err';
+      console.error(`[BCA] upload erro em ${f.name}:`, e.message);
+      fail++;
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Enviar para Base de Conhecimento';
+
+  if (ok>0 && fail===0) {
+    msg.textContent = `✓ ${ok} documento(s) indexado(s) com sucesso! Disponível no Chat Jurídico.`;
+    msg.className = 'up-result-msg ok';
+  } else if (fail>0) {
+    msg.textContent = `${ok} indexado(s) · ${fail} com erro. Verifique o console para detalhes.`;
+    msg.className = 'up-result-msg err';
+  }
+}
+
+// drag-drop upload panel
+const upDrop = document.getElementById('upDrop');
+upDrop.addEventListener('dragover',  e => { e.preventDefault(); upDrop.classList.add('dragover'); });
+upDrop.addEventListener('dragleave', ()=> upDrop.classList.remove('dragover'));
+upDrop.addEventListener('drop', e => {
+  e.preventDefault(); upDrop.classList.remove('dragover');
+  addToQueue(e.dataTransfer.files);
+});
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContent').style.display  = 'none';
+}
+function showApp(email) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContent').style.display  = 'flex';
+  document.getElementById('userEmail').textContent = email;
+  checkConnection(); // FIX: usa POST real em vez de OPTIONS
+}
+function showLoginError(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.style.display = 'block';
+  document.getElementById('loginLoading').style.display = 'none';
+  document.getElementById('loginBtn').style.display = 'flex';
+}
+function loginWithGoogle() {
+  document.getElementById('loginBtn').style.display     = 'none';
+  document.getElementById('loginLoading').style.display = 'block';
+  document.getElementById('loginError').style.display   = 'none';
+  const redirectTo = encodeURIComponent(window.location.href.split('#')[0]);
+  window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
+}
+function logout() {
+  clearSession();
+  // Chama endpoint de signout do Supabase (sem SDK)
+  const session = loadSession();
+  if (session?.token) {
+    fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${session.token}`, 'apikey': SUPABASE_ANON_KEY }
+    }).catch(()=>{});
+  }
+  clearSession();
+  showLogin();
+}
+
+function initAuth() {
+  // 1. Checa se há sessão salva (reload de página)
+  const saved = loadSession();
+  if (saved?.token && saved?.email) {
+    showApp(saved.email);
+    return;
+  }
+
+  // 2. Checa se voltou do OAuth (hash com access_token)
+  const hash = window.location.hash;
+  if (hash.includes('access_token')) {
+    try {
+      const params      = new URLSearchParams(hash.substring(1));
+      const accessToken = params.get('access_token');
+      // Limpa o hash da URL sem causar reload
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+
+      // Decodifica JWT
+      const b64     = accessToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+      const payload = JSON.parse(atob(b64));
+      const email   = payload?.email || payload?.user_metadata?.email || '';
+
+      if (!email) { showLogin(); showLoginError('Não foi possível identificar o e-mail da conta.'); return; }
+
+      if (email.toLowerCase().endsWith(ALLOWED_DOMAIN)) {
+        saveSession(accessToken, email); // FIX: persiste sessão
+        showApp(email);
       } else {
-        contractText = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result);
-          r.onerror = rej;
-          r.readAsText(window._contractFile, 'UTF-8');
-        });
-      }
-
-      const prompt = `Você é um especialista jurídico do escritório BCA (Barbur Carneiro Advogados).
-
-O usuário forneceu abaixo uma cláusula ou trecho de contrato externo. Sua tarefa é:
-
-1. BUSCAR nos documentos do BCA que você conhece as cláusulas mais similares ou equivalentes a este texto.
-2. TRANSCREVER ou descrever como o BCA redigiu cláusula(s) similar(es) nos seus documentos.
-3. COMPARAR lado a lado: o texto fornecido vs. o padrão BCA — destacando diferenças de redação, termos jurídicos, obrigações, prazos, penalidades, etc.
-4. IDENTIFICAR riscos ou incompatibilidades com os padrões e valores do BCA.
-5. SUGERIR como adequar o texto fornecido ao padrão BCA.
-
-Estruture a resposta assim:
-
-🔍 CLÁUSULA(S) SIMILAR(ES) ENCONTRADA(S) NOS DOCUMENTOS BCA
-[Descreva o que o BCA tem de equivalente]
-
-⚖️ COMPARAÇÃO: TEXTO FORNECIDO × PADRÃO BCA
-[Compare os dois lado a lado, apontando diferenças]
-
-⚠️ DIFERENÇAS E RISCOS IDENTIFICADOS
-[Liste as divergências relevantes]
-
-✅ O QUE JÁ ESTÁ CONFORME
-[Pontos que coincidem com o padrão BCA]
-
-💡 SUGESTÃO DE ADEQUAÇÃO
-[Como reescrever ou ajustar para alinhar ao BCA]
-
-TEXTO FORNECIDO PARA COMPARAÇÃO:
-"""
-${contractText.slice(0, 4000)}
-"""`;
-
-      const reply = await callGemini(
-        `TEXTO FORNECIDO PARA COMPARAÇÃO:\n"""\n${contractText.slice(0, 6000)}\n"""`,
-        'comparador'
-      );
-
-      ld.style.display = 'none';
-      ar.style.display = 'flex';
-      document.getElementById('aiAnalysis').innerHTML = fmt(reply);
-
-    } catch (err) {
-      ld.style.display = 'none';
-      rp.style.display = 'flex';
-      rp.querySelector('div:last-child').textContent = 'Erro: ' + err.message;
-    }
-  }
-
-  // ── UPLOAD DE DOCUMENTOS ─────────────────────────────
-  let uploadQueue = [];
-
-  function addToQueue(files) {
-    Array.from(files).forEach(f => {
-      if (!uploadQueue.find(x => x.name === f.name)) {
-        uploadQueue.push(f);
-      }
-    });
-    renderQueue();
-  }
-
-  function renderQueue() {
-    const q = document.getElementById('upQueue');
-    const a = document.getElementById('upActions');
-    if (uploadQueue.length === 0) { q.style.display = 'none'; a.style.display = 'none'; return; }
-    q.style.display = 'flex'; a.style.display = 'flex';
-    q.innerHTML = uploadQueue.map((f, i) => `
-      <div class="up-file-row" id="upRow-${i}">
-        <div class="up-file-icon">${f.name.endsWith('.pdf') ? '📕' : '📘'}</div>
-        <div class="up-file-info">
-          <div class="up-file-name" title="${f.name}">${f.name}</div>
-          <div class="up-file-size">${(f.size / 1024).toFixed(1)} KB</div>
-        </div>
-        <span class="up-file-status status-wait" id="upStatus-${i}">Aguardando</span>
-        <button class="up-remove" onclick="removeFromQueue(${i})" title="Remover">✕</button>
-      </div>`).join('');
-  }
-
-  function removeFromQueue(i) {
-    uploadQueue.splice(i, 1);
-    renderQueue();
-  }
-
-  function clearQueue() {
-    uploadQueue = [];
-    renderQueue();
-    document.getElementById('upResultMsg').className = 'up-result-msg';
-    document.getElementById('upFileInput').value = '';
-  }
-
-  async function sendToAnythingLLM() {
-    if (uploadQueue.length === 0) return;
-    const btn = document.getElementById('upSendBtn');
-    btn.disabled = true;
-    btn.textContent = 'Enviando...';
-    const msg = document.getElementById('upResultMsg');
-    msg.className = 'up-result-msg';
-    let ok = 0, fail = 0;
-
-    for (let i = 0; i < uploadQueue.length; i++) {
-      const f = uploadQueue[i];
-      const statusEl = document.getElementById(`upStatus-${i}`);
-      statusEl.textContent = 'Lendo arquivo...';
-      statusEl.className = 'up-file-status status-send';
-      try {
-        // Lê o arquivo como texto
-        const texto = await new Promise((res, rej) => {
-          const r = new FileReader();
-          r.onload = e => res(e.target.result);
-          r.onerror = rej;
-          r.readAsText(f, 'UTF-8');
-        });
-
-        statusEl.textContent = 'Gerando embeddings...';
-
-        // Envia para Edge Function bca-embed
-        const result = await embedDocument(texto, f.name);
-
-        statusEl.textContent = `Indexado ✓ (${result.chunks_salvos} chunks)`;
-        statusEl.className = 'up-file-status status-ok';
-        ok++;
-      } catch (e) {
-        statusEl.textContent = 'Erro ✕';
-        statusEl.className = 'up-file-status status-err';
-        fail++;
-      }
-    }
-
-    btn.disabled = false;
-    btn.textContent = 'Enviar para Base de Conhecimento';
-    if (ok > 0 && fail === 0) {
-      msg.textContent = `✓ ${ok} documento(s) indexado(s) com sucesso via Gemini! Disponível no Chat Jurídico.`;
-      msg.className = 'up-result-msg ok';
-    } else if (fail > 0) {
-      msg.textContent = `${ok} indexado(s) com sucesso · ${fail} com erro.`;
-      msg.className = 'up-result-msg err';
-    }
-  }
-
-  // drag-drop on upload panel
-  const upDrop = document.getElementById('upDrop');
-  upDrop.addEventListener('dragover',  e => { e.preventDefault(); upDrop.classList.add('dragover'); });
-  upDrop.addEventListener('dragleave', () => upDrop.classList.remove('dragover'));
-  upDrop.addEventListener('drop', e => {
-    e.preventDefault(); upDrop.classList.remove('dragover');
-    addToQueue(e.dataTransfer.files);
-  });
-
-  // ══════════════════════════════════════════════
-  // AUTH — sem Supabase SDK, JWT puro
-  // ══════════════════════════════════════════════
-  const SUPABASE_URL   = 'https://hnhfbjuedesmkxrmmfan.supabase.co';
-  const SUPABASE_ANON  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaGZianVlZGVzbWt4cm1tZmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTcwMzYsImV4cCI6MjA4ODU3MzAzNn0.MemLsn-_uLOlo7YpK0u7ulRxuvMVHMIUJyKNv20jocY';
-  const ALLOWED_DOMAIN = '@barburcarneiro.com.br';
-
-  function showLogin() {
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('appContent').style.display  = 'none';
-  }
-
-  function showApp(user) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appContent').style.display  = 'flex';
-    const emailEl = document.getElementById('userEmail');
-    if (emailEl && user?.email) emailEl.textContent = user.email;
-    checkAnythingLLM();
-  }
-
-  function showLoginError(msg) {
-    const el = document.getElementById('loginError');
-    el.textContent = msg;
-    el.style.display = 'block';
-    document.getElementById('loginLoading').style.display = 'none';
-    document.getElementById('loginBtn').style.display = 'flex';
-  }
-
-  function checkDomain(email) {
-    return email && email.toLowerCase().endsWith(ALLOWED_DOMAIN);
-  }
-
-  // Redireciona para Google OAuth via Supabase (sem SDK)
-  function loginWithGoogle() {
-    document.getElementById('loginBtn').style.display     = 'none';
-    document.getElementById('loginLoading').style.display = 'block';
-    document.getElementById('loginError').style.display   = 'none';
-    const redirectTo = encodeURIComponent('https://mayara-cmd.github.io/BcaIA/');
-    window.location.href = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectTo}`;
-  }
-
-  function logout() {
-    window._authToken = null;
-    showLogin();
-  }
-
-  // Processa token ao voltar do OAuth
-  function initAuth() {
-    const hash = window.location.hash;
-    if (hash.includes('access_token')) {
-      try {
-        const params      = new URLSearchParams(hash.substring(1));
-        const accessToken = params.get('access_token');
-        history.replaceState(null, '', window.location.pathname);
-        const b64     = accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(atob(b64));
-        const email   = payload?.email || payload?.user_metadata?.email;
-        if (!email) { showLogin(); showLoginError('Não foi possível identificar o e-mail.'); return; }
-        if (checkDomain(email)) {
-          window._authToken = accessToken;
-          showApp({ email });
-        } else {
-          showLogin();
-          showLoginError(`⛔ Acesso negado. Apenas contas ${ALLOWED_DOMAIN} têm permissão.\nVocê tentou entrar com: ${email}`);
-        }
-      } catch (err) {
         showLogin();
-        showLoginError('Erro ao processar login: ' + err.message);
+        showLoginError(`⛔ Acesso negado.\nApenas contas ${ALLOWED_DOMAIN} têm permissão.\nVocê tentou: ${email}`);
       }
-      return;
+    } catch(err) {
+      showLogin();
+      showLoginError('Erro ao processar login: ' + err.message);
     }
-    showLogin();
+    return;
   }
 
-  initAuth();
+  // 3. Sem sessão e sem hash → tela de login
+  showLogin();
+}
+
+initAuth();
 </script>
-</div><!-- /appContent -->
 </body>
 </html>
