@@ -514,27 +514,67 @@
 </div><!-- /main -->
 
 <script>
-  const API_KEY   = 'MQA8ZGK-4AE4EYV-Q5F3Y05-V8CY281';
-  const WORKSPACE = 'meu-workspace';
-  const API_BASE  = 'http://localhost:3001/api/v1';
+  // ── CONFIG ──────────────────────────────────────────
+  const SUPABASE_FUNCTIONS = 'https://hnhfbjuedesmkxrmmfan.supabase.co/functions/v1';
+  const ANON_KEY           = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaGZianVlZGVzbWt4cm1tZmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MjM0ODEsImV4cCI6MjA1NjQ5OTQ4MX0.eyJpc3MiOiJzdXBhYmFzZSJ9';
+  // ────────────────────────────────────────────────────
 
-  // Testa conexão com AnythingLLM ao carregar
+  // Testa conexão com Edge Function ao carregar
   async function checkAnythingLLM() {
     try {
-      const res = await fetch(`${API_BASE}/auth`, {
-        headers: { 'Authorization': `Bearer ${API_KEY}` },
-        signal: AbortSignal.timeout(3000)
+      const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-chat`, {
+        method: 'OPTIONS',
+        signal: AbortSignal.timeout(4000)
       });
-      if (res.ok) {
-        document.getElementById('llmStatus').innerHTML = '🟢 &nbsp;IA Conectada';
-        document.getElementById('llmStatus').style.color = '#7ab87a';
-      } else { setOffline(); }
-    } catch { setOffline(); }
+      document.getElementById('llmStatus').innerHTML = '🟢 &nbsp;Gemini Conectado';
+      document.getElementById('llmStatus').style.color = '#7ab87a';
+    } catch {
+      document.getElementById('llmStatus').innerHTML = '🔴 &nbsp;IA Indisponível';
+      document.getElementById('llmStatus').style.color = '#d07a7a';
+    }
   }
 
   function setOffline() {
-    document.getElementById('llmStatus').innerHTML = '🔴 &nbsp;IA Offline — abra o AnythingLLM no computador';
+    document.getElementById('llmStatus').innerHTML = '🔴 &nbsp;IA Indisponível';
     document.getElementById('llmStatus').style.color = '#d07a7a';
+  }
+
+  // Chamada à Edge Function bca-chat
+  async function callGemini(message, mode = 'chat') {
+    const session = await _supabase.auth.getSession();
+    const token   = session?.data?.session?.access_token || ANON_KEY;
+
+    const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ message, mode })
+    });
+
+    if (!res.ok) throw new Error(`Erro ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.response;
+  }
+
+  // Envia documento para indexação via Edge Function bca-embed
+  async function embedDocument(texto, nome_arquivo, tipo = 'documento') {
+    const session = await _supabase.auth.getSession();
+    const token   = session?.data?.session?.access_token || ANON_KEY;
+
+    const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-embed`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ texto, nome_arquivo, tipo })
+    });
+
+    if (!res.ok) throw new Error(`Erro ${res.status}`);
+    return await res.json();
   }
 
   // ── NAV ──────────────────────────────────────────────
@@ -603,18 +643,12 @@
     document.getElementById('sendBtn').disabled = true;
     addTyping();
     try {
-      const res = await fetch(`${API_BASE}/workspace/${WORKSPACE}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-        body: JSON.stringify({ message: text, mode: 'chat' })
-      });
-      if (!res.ok) throw new Error(`Erro ${res.status}`);
-      const data = await res.json();
+      const reply = await callGemini(text, 'chat');
       removeTyping();
-      addMessage(fmt(data.textResponse || data.response || 'Sem resposta.'), false);
+      addMessage(fmt(reply), false);
     } catch (err) {
       removeTyping();
-      showError(err.message.includes('fetch') ? 'AnythingLLM não encontrado. Verifique se o aplicativo está aberto.' : 'Erro: ' + err.message);
+      showError(err.message.includes('fetch') ? 'IA indisponível. Tente novamente em instantes.' : 'Erro: ' + err.message);
     } finally {
       document.getElementById('sendBtn').disabled = false;
     }
@@ -742,17 +776,14 @@ TEXTO FORNECIDO PARA COMPARAÇÃO:
 ${contractText.slice(0, 4000)}
 """`;
 
-      const res = await fetch(`${API_BASE}/workspace/${WORKSPACE}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-        body: JSON.stringify({ message: prompt, mode: 'chat' })
-      });
-      if (!res.ok) throw new Error(`Erro ${res.status}`);
-      const data = await res.json();
+      const reply = await callGemini(
+        `TEXTO FORNECIDO PARA COMPARAÇÃO:\n"""\n${contractText.slice(0, 6000)}\n"""`,
+        'comparador'
+      );
 
       ld.style.display = 'none';
       ar.style.display = 'flex';
-      document.getElementById('aiAnalysis').innerHTML = fmt(data.textResponse || data.response || 'Sem resposta.');
+      document.getElementById('aiAnalysis').innerHTML = fmt(reply);
 
     } catch (err) {
       ld.style.display = 'none';
@@ -814,30 +845,23 @@ ${contractText.slice(0, 4000)}
     for (let i = 0; i < uploadQueue.length; i++) {
       const f = uploadQueue[i];
       const statusEl = document.getElementById(`upStatus-${i}`);
-      statusEl.textContent = 'Enviando...';
+      statusEl.textContent = 'Lendo arquivo...';
       statusEl.className = 'up-file-status status-send';
       try {
-        const formData = new FormData();
-        formData.append('file', f, f.name);
-        const res = await fetch(`${API_BASE}/document/upload`, {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${API_KEY}` },
-          body: formData
+        // Lê o arquivo como texto
+        const texto = await new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onload = e => res(e.target.result);
+          r.onerror = rej;
+          r.readAsText(f, 'UTF-8');
         });
-        if (!res.ok) throw new Error(res.status);
 
-        // Move to workspace
-        const data = await res.json();
-        const docLocation = data?.documents?.[0]?.location;
-        if (docLocation) {
-          await fetch(`${API_BASE}/workspace/${WORKSPACE}/update-embeddings`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
-            body: JSON.stringify({ adds: [docLocation], deletes: [] })
-          });
-        }
+        statusEl.textContent = 'Gerando embeddings...';
 
-        statusEl.textContent = 'Indexado ✓';
+        // Envia para Edge Function bca-embed
+        const result = await embedDocument(texto, f.name);
+
+        statusEl.textContent = `Indexado ✓ (${result.chunks_salvos} chunks)`;
         statusEl.className = 'up-file-status status-ok';
         ok++;
       } catch (e) {
@@ -850,10 +874,10 @@ ${contractText.slice(0, 4000)}
     btn.disabled = false;
     btn.textContent = 'Enviar para Base de Conhecimento';
     if (ok > 0 && fail === 0) {
-      msg.textContent = `✓ ${ok} documento(s) enviado(s) e indexado(s) com sucesso! Já disponível no Chat Jurídico.`;
+      msg.textContent = `✓ ${ok} documento(s) indexado(s) com sucesso via Gemini! Disponível no Chat Jurídico.`;
       msg.className = 'up-result-msg ok';
     } else if (fail > 0) {
-      msg.textContent = `${ok} enviado(s) com sucesso · ${fail} com erro. Verifique se o AnythingLLM está aberto.`;
+      msg.textContent = `${ok} indexado(s) com sucesso · ${fail} com erro.`;
       msg.className = 'up-result-msg err';
     }
   }
