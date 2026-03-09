@@ -539,40 +539,26 @@
     document.getElementById('llmStatus').style.color = '#d07a7a';
   }
 
-  // Chamada à Edge Function bca-chat
   async function callGemini(message, mode = 'chat') {
-    const session = await _supabase.auth.getSession();
-    const token   = session?.data?.session?.access_token || ANON_KEY;
-
+    const token = window._authToken || ANON_KEY;
     const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-chat`, {
       method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ message, mode })
     });
-
     if (!res.ok) throw new Error(`Erro ${res.status}: ${res.statusText}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     return data.response;
   }
 
-  // Envia documento para indexação via Edge Function bca-embed
   async function embedDocument(texto, nome_arquivo, tipo = 'documento') {
-    const session = await _supabase.auth.getSession();
-    const token   = session?.data?.session?.access_token || ANON_KEY;
-
+    const token = window._authToken || ANON_KEY;
     const res = await fetch(`${SUPABASE_FUNCTIONS}/bca-embed`, {
       method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ texto, nome_arquivo, tipo })
     });
-
     if (!res.ok) throw new Error(`Erro ${res.status}`);
     return await res.json();
   }
@@ -953,58 +939,41 @@ ${contractText.slice(0, 4000)}
     return email && email.toLowerCase().endsWith(ALLOWED_DOMAIN);
   }
 
-  // On page load: check if user is already logged in
+  // On page load
   async function initAuth() {
     const hash = window.location.hash;
 
     if (hash.includes('access_token')) {
-      const params       = new URLSearchParams(hash.substring(1));
-      const accessToken  = params.get('access_token');
-      const refreshToken = params.get('refresh_token') || '';
-
-      // Limpa hash imediatamente
-      history.replaceState(null, '', window.location.pathname);
-
       try {
-        const { data, error } = await _supabase.auth.setSession({
-          access_token:  accessToken,
-          refresh_token: refreshToken
-        });
+        const params      = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
 
-        if (error) {
+        // Limpa hash da URL imediatamente
+        history.replaceState(null, '', window.location.pathname);
+
+        // Decodifica JWT sem chamar nenhuma API
+        const parts   = accessToken.split('.');
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        const email   = payload?.email || payload?.user_metadata?.email;
+
+        if (!email) {
           showLogin();
-          showLoginError('Erro ao validar sessão: ' + error.message);
+          showLoginError('Não foi possível identificar o e-mail da conta Google.');
           return;
         }
 
-        if (data?.user) {
-          const email = data.user.email;
-          if (checkDomain(email)) {
-            showApp(data.user);
-          } else {
-            await _supabase.auth.signOut();
-            showLogin();
-            showLoginError(`⛔ Acesso negado. Apenas contas ${ALLOWED_DOMAIN} têm permissão. Você tentou entrar com: ${email}`);
-          }
-          return;
-        }
-
-        // setSession não retornou user — tenta decodificar JWT manualmente
-        const payload = JSON.parse(atob(accessToken.split('.')[1]));
-        const email   = payload?.email;
-        if (email && checkDomain(email)) {
-          // Força exibição do app com dados do JWT
+        if (checkDomain(email)) {
+          // Armazena token em memória para usar nas chamadas da API
+          window._authToken = accessToken;
           showApp({ email });
         } else {
           showLogin();
-          showLoginError(email
-            ? `⛔ Acesso negado. Você tentou entrar com: ${email}`
-            : 'Não foi possível identificar o usuário.');
+          showLoginError(`⛔ Acesso negado. Apenas contas ${ALLOWED_DOMAIN} têm permissão.\nVocê tentou entrar com: ${email}`);
         }
 
       } catch (err) {
         showLogin();
-        showLoginError('Erro inesperado: ' + err.message);
+        showLoginError('Erro ao processar login: ' + err.message);
       }
       return;
     }
