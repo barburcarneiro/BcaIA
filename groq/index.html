@@ -436,6 +436,31 @@
           <div class="up-sub">Envie documentos para indexação via Gemini Embeddings — ficam disponíveis no Chat Jurídico</div>
         </div>
         <div class="up-body">
+
+          <!-- ══ INDEXAR BUCKET ══ -->
+          <div style="background:var(--white);border:1px solid var(--fendi-border);border-radius:10px;padding:1.1rem 1.25rem;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--fendi);margin-bottom:0.75rem;">
+              📦 Documentos já no Bucket do Supabase
+            </div>
+            <div style="font-size:0.77rem;color:var(--email-dark);margin-bottom:0.9rem;line-height:1.6;">
+              Esses arquivos estão no Storage mas ainda não foram indexados. Clique em <strong>Indexar todos</strong> para gerar os embeddings e disponibilizá-los no Chat e Comparador.
+            </div>
+            <div id="bucketList" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.9rem;">
+              <div style="font-size:0.75rem;color:var(--email-dark);">⏳ Carregando lista do bucket...</div>
+            </div>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+              <button onclick="loadBucketFiles()" style="padding:0.55rem 1rem;background:var(--email-light);border:1px solid var(--fendi-border);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;color:var(--fendi);cursor:pointer;">🔄 Atualizar lista</button>
+              <button id="indexAllBtn" onclick="indexAllBucket()" style="padding:0.55rem 1.2rem;background:var(--black);border:none;border-radius:7px;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;color:var(--fendi-light);cursor:pointer;letter-spacing:0.06em;">⚡ Indexar todos</button>
+            </div>
+            <div id="bucketProgress" style="display:none;margin-top:0.75rem;">
+              <div style="font-size:0.72rem;color:var(--email-dark);margin-bottom:0.4rem;" id="bucketProgressMsg">Indexando...</div>
+              <div style="background:var(--email-light);border-radius:4px;height:6px;overflow:hidden;">
+                <div id="bucketProgressBar" style="height:100%;background:var(--fendi);border-radius:4px;width:0%;transition:width 0.4s;"></div>
+              </div>
+            </div>
+            <div id="bucketResult" style="display:none;margin-top:0.75rem;padding:0.65rem 0.9rem;border-radius:8px;font-size:0.75rem;line-height:1.6;"></div>
+          </div>
+
           <div class="up-warn">
             ⚠️ <strong>Formatos recomendados: .txt</strong><br>
             Arquivos PDF e DOC/DOCX contêm bytes binários que não podem ser lidos diretamente pelo navegador como texto. Para indexar corretamente, converta para <strong>.txt</strong> primeiro (copie e cole o conteúdo em um editor de texto e salve como .txt).
@@ -874,6 +899,144 @@ function toggleCompDebug() {
 // ══════════════════════════════════════════════
 // UPLOAD DE DOCUMENTOS — FIX: usa readAsText corretamente
 // ══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════
+// INDEXAR DOCUMENTOS DO BUCKET SUPABASE
+// ══════════════════════════════════════════════════════════
+let _bucketFiles = [];
+
+async function loadBucketFiles() {
+  const listEl  = document.getElementById('bucketList');
+  const resultEl = document.getElementById('bucketResult');
+  resultEl.style.display = 'none';
+  listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">⏳ Consultando bucket...</div>';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/list/documentos-bca`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({ limit: 100, offset: 0, sortBy: { column: 'name', order: 'asc' } })
+    });
+
+    const files = await res.json();
+
+    if (!Array.isArray(files) || files.length === 0) {
+      listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Nenhum arquivo encontrado no bucket <code>documentos-bca</code>.</div>';
+      return;
+    }
+
+    _bucketFiles = files.filter(f => f.name && /\.(pdf|doc|docx|txt)$/i.test(f.name));
+
+    listEl.innerHTML = _bucketFiles.map((f, i) => `
+      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.6rem;background:var(--email-light);border-radius:6px;border:1px solid var(--fendi-border);">
+        <span style="font-size:0.85rem;">${/\.pdf$/i.test(f.name) ? '📄' : /\.(doc|docx)$/i.test(f.name) ? '📝' : '📃'}</span>
+        <span style="font-size:0.74rem;color:var(--dark-gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>
+        <span style="font-size:0.62rem;color:var(--email-dark);">${f.metadata?.size ? (f.metadata.size/1024).toFixed(0)+'KB' : ''}</span>
+        <button onclick="indexSingleBucketFile('${f.name}', this)" 
+          style="padding:0.2rem 0.55rem;background:var(--fendi-dim);border:1px solid var(--fendi-border);border-radius:5px;font-size:0.62rem;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--fendi);cursor:pointer;white-space:nowrap;">
+          Indexar
+        </button>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    listEl.innerHTML = `<div style="font-size:0.75rem;color:#b05a5a;">Erro ao listar bucket: ${e.message}</div>`;
+  }
+}
+
+async function indexSingleBucketFile(filename, btn) {
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+  try {
+    // Baixa o arquivo do bucket
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/documentos-bca/${encodeURIComponent(filename)}`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    if (!res.ok) throw new Error(`Erro ao baixar (HTTP ${res.status})`);
+
+    const blob = await res.blob();
+    const file = new File([blob], filename, { type: blob.type });
+
+    // Extrai texto no browser (zero tokens)
+    const text = await extractTextFromFile(file);
+    if (!text || text.length < 30) throw new Error('Texto extraído muito curto ou ilegível');
+
+    // Envia para bca-embed indexar
+    const reply = await callEdgeFunction('bca-embed', {
+      nome_arquivo: filename,
+      texto: text.slice(0, 50000)
+    });
+
+    if (btn) { btn.textContent = '✅'; btn.style.background = '#eef5f0'; btn.style.color = '#5a8a6a'; }
+    return { ok: true, nome: filename, reply };
+
+  } catch(e) {
+    if (btn) { btn.textContent = '❌'; btn.style.background = '#fdf0f0'; btn.style.color = '#b05a5a'; btn.disabled = false; btn.title = e.message; }
+    return { ok: false, nome: filename, erro: e.message };
+  }
+}
+
+async function indexAllBucket() {
+  if (_bucketFiles.length === 0) { await loadBucketFiles(); return; }
+
+  const btn      = document.getElementById('indexAllBtn');
+  const progress = document.getElementById('bucketProgress');
+  const bar      = document.getElementById('bucketProgressBar');
+  const msg      = document.getElementById('bucketProgressMsg');
+  const result   = document.getElementById('bucketResult');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Indexando...';
+  progress.style.display = 'block';
+  result.style.display   = 'none';
+
+  const total = _bucketFiles.length;
+  let ok = 0, fail = 0, failList = [];
+
+  for (let i = 0; i < total; i++) {
+    const f = _bucketFiles[i];
+    msg.textContent = `Indexando ${i+1}/${total}: ${f.name}`;
+    bar.style.width = `${Math.round(((i) / total) * 100)}%`;
+
+    // Localiza o botão individual na lista
+    const rowBtns = document.querySelectorAll('#bucketList button');
+    const rowBtn  = rowBtns[i] || null;
+
+    const res = await indexSingleBucketFile(f.name, rowBtn);
+    if (res.ok) ok++; else { fail++; failList.push(f.name); }
+
+    // Delay entre chamadas para não estourar rate limit do embedding
+    if (i < total - 1) await new Promise(r => setTimeout(r, 1500));
+  }
+
+  bar.style.width = '100%';
+  msg.textContent = 'Concluído!';
+
+  result.style.display = 'block';
+  if (fail === 0) {
+    result.style.background = '#eef5f0';
+    result.style.border = '1px solid #c0dac8';
+    result.style.color = '#5a8a6a';
+    result.innerHTML = `✅ <strong>${ok} documento(s)</strong> indexados com sucesso! Já estão disponíveis no Chat e Comparador.`;
+  } else {
+    result.style.background = '#fff8e6';
+    result.style.border = '1px solid #f0d080';
+    result.style.color = '#8a7020';
+    result.innerHTML = `⚠️ <strong>${ok} ok</strong> · <strong>${fail} com erro:</strong><br>${failList.map(n=>`• ${n}`).join('<br>')}`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⚡ Indexar todos';
+}
+
+// Carrega lista automaticamente ao abrir a aba
+document.addEventListener('DOMContentLoaded', () => {
+  loadBucketFiles();
+});
+
 let uploadQueue = [];
 
 function addToQueue(files) {
