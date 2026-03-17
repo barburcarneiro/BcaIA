@@ -455,18 +455,11 @@ async function callEdgeFunction(fnName, body) {
 // ══════════════════════════════════════════════
 // CONEXÃO
 // ══════════════════════════════════════════════
-async function checkConnection() {
+function checkConnection() {
+  // Ping removido para economizar tokens
   const statusEl = document.getElementById('llmStatus');
-  statusEl.innerHTML = '⏳ Verificando Groq...';
-  statusEl.style.color = '';
-  try {
-    await callEdgeFunction('bca-chat-groq', { message: 'ping', mode: 'chat' });
-    statusEl.innerHTML = '🟢 &nbsp;Groq · Llama 3.3 Conectado';
-    statusEl.style.color = '#7ab87a';
-  } catch(err) {
-    statusEl.innerHTML = '🔴 &nbsp;Groq Indisponível';
-    statusEl.style.color = '#d07a7a';
-  }
+  statusEl.innerHTML = '🟢 &nbsp;Groq · Llama 3.3';
+  statusEl.style.color = '#7ab87a';
 }
 
 // ══════════════════════════════════════════════
@@ -569,7 +562,7 @@ async function sendMessage() {
   addTyping();
   document.getElementById('debugRow').style.display = 'flex';
 
-  const historico = loadHistory().slice(-6).map(m => ({ role: m.role, content: m.content }));
+  const historico = loadHistory().slice(-3).map(m => ({ role: m.role, content: m.content }));
 
   try {
     const reply = await callEdgeFunction('bca-chat-groq', { message: text, mode: 'chat', historico });
@@ -664,7 +657,7 @@ async function analyzeContract() {
 
     if (ldMsg) ldMsg.textContent = 'Buscando cláusulas similares na base BCA...';
     const reply = await callEdgeFunction('bca-chat-groq', {
-      message: `TEXTO FORNECIDO PARA COMPARAÇÃO:\n"""\n${contractText.slice(0, 8000)}\n"""`,
+      message: `TEXTO FORNECIDO PARA COMPARAÇÃO:\n"""\n${contractText.slice(0, 3000)}\n"""`,
       mode: 'comparador'
     });
 
@@ -990,15 +983,7 @@ function initAuth() {
 }
 initAuth();
 
-// ── Anti-pausa Supabase ───────────────────────
-(function antiPausa() {
-  const KEY = 'bca_last_ping', INTERVAL = 3*24*60*60*1000, now = Date.now();
-  let last = 0; try { last = parseInt(localStorage.getItem(KEY)||'0'); } catch(e) {}
-  if (now - last > INTERVAL) {
-    fetch(`${FUNCTIONS_URL}/bca-chat-groq`, { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_ANON_KEY}, body:JSON.stringify({message:'ping',mode:'chat'}) })
-      .then(()=>{ try { localStorage.setItem(KEY, String(Date.now())); } catch(e){} }).catch(()=>{});
-  }
-})();
+// Anti-pausa removido para economizar tokens
 
 // ── Inicialização ─────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
