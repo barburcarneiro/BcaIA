@@ -452,22 +452,6 @@ async function callEdgeFunction(fnName, body) {
   return reply;
 }
 
-// Versão que retorna o objeto completo (para list-docs)
-async function callEdgeFunctionRaw(fnName, body) {
-  const session = loadSession();
-  const headers = {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_ANON_KEY,
-    'Authorization': `Bearer ${session?.token || SUPABASE_ANON_KEY}`
-  };
-  const res = await fetch(`${FUNCTIONS_URL}/${fnName}`, {
-    method: 'POST', headers, body: JSON.stringify(body)
-  });
-  const rawText = await res.text();
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${rawText.slice(0,200)}`);
-  return JSON.parse(rawText);
-}
-
 // ══════════════════════════════════════════════
 // CONEXÃO
 // ══════════════════════════════════════════════
@@ -585,7 +569,6 @@ async function sendMessage() {
   addTyping();
   document.getElementById('debugRow').style.display = 'flex';
 
-  // Monta histórico para contexto multi-turno
   const historico = loadHistory().slice(-6).map(m => ({ role: m.role, content: m.content }));
 
   try {
@@ -705,9 +688,9 @@ function toggleCompDebug() {
 }
 
 // ══════════════════════════════════════════════
-// PAINEL DE DOCUMENTOS DA RAG
-// Usa modo list-docs da edge function (service_role)
-// para listar bucket privado com status de indexação
+// PAINEL DE DOCUMENTOS — CORRIGIDO
+// Busca direto na tabela documentos via REST API
+// e cruza com o bucket para mostrar status real
 // ══════════════════════════════════════════════
 let _bucketFiles = [];
 
@@ -718,39 +701,90 @@ async function loadBucketFiles() {
   listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">⏳ Consultando base...</div>';
 
   try {
-    const data = await callEdgeFunctionRaw('bca-chat-groq', { mode: 'list-docs', message: 'list' });
-    if (data.error) throw new Error(data.error);
+    const sess = loadSession();
+    const tok  = sess?.token || SUPABASE_ANON_KEY;
 
-    const arquivos = data.arquivos || [];
-    // Mantém _bucketFiles no formato esperado por indexSingleBucketFile e indexAllBucket
-    _bucketFiles = arquivos.map(f => ({ name: f.nome, indexado: f.indexado, chunks: f.chunks }));
+    // 1. Busca todos os registros da tabela documentos (sem limite de 4)
+    const tabelaRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/documentos?select=nome_arquivo&order=nome_arquivo.asc&limit=500`,
+      { headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${tok}` } }
+    );
+    const tabelaRows = await tabelaRes.json();
 
-    if (arquivos.length === 0) {
-      listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Nenhum arquivo encontrado no bucket <code>documentos-bca</code>.</div>';
+    // Conta chunks por arquivo
+    const chunksPorArquivo = {};
+    if (Array.isArray(tabelaRows)) {
+      tabelaRows.forEach(r => {
+        if (r.nome_arquivo) {
+          chunksPorArquivo[r.nome_arquivo] = (chunksPorArquivo[r.nome_arquivo] || 0) + 1;
+        }
+      });
+    }
+    const arquivosIndexados = Object.keys(chunksPorArquivo);
+
+    // 2. Busca arquivos no bucket Storage
+    const bucketRes = await fetch(`${SUPABASE_URL}/storage/v1/object/list/documentos-bca`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      },
+      body: JSON.stringify({ limit: 200, offset: 0, sortBy: { column: 'name', order: 'asc' } })
+    });
+    const bucketFiles = await bucketRes.json();
+    const bucketMap = {};
+    if (Array.isArray(bucketFiles)) {
+      bucketFiles
+        .filter(f => f.name && /\.(pdf|doc|docx|txt)$/i.test(f.name))
+        .forEach(f => {
+          bucketMap[f.name] = f.metadata?.size ? Math.round(f.metadata.size / 1024) : null;
+        });
+    }
+    const arquivosBucket = Object.keys(bucketMap);
+
+    // 3. Mescla: todos os arquivos conhecidos (indexados + bucket), sem duplicar
+    const todos = [...new Set([...arquivosIndexados, ...arquivosBucket])].sort();
+    _bucketFiles = todos.map(nome => ({
+      name:     nome,
+      indexado: arquivosIndexados.includes(nome),
+      chunks:   chunksPorArquivo[nome] || 0
+    }));
+
+    if (todos.length === 0) {
+      listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Nenhum documento encontrado na base ou no bucket.</div>';
       return;
     }
 
-    const total     = data.total;
-    const indexados = data.indexados;
-    const corStatus = indexados === total ? '#c0dac8' : '#f0d080';
-    const bgStatus  = indexados === total ? '#eef5f0' : '#fff8e6';
-    const txStatus  = indexados === total ? '#5a8a6a' : '#8a7020';
+    const totalIndexados = arquivosIndexados.length;
+    const totalArquivos  = todos.length;
+    const corStatus = totalIndexados === totalArquivos ? '#c0dac8' : '#f0d080';
+    const bgStatus  = totalIndexados === totalArquivos ? '#eef5f0' : '#fff8e6';
+    const txStatus  = totalIndexados === totalArquivos ? '#5a8a6a' : '#8a7020';
 
     listEl.innerHTML = `
       <div style="font-size:0.72rem;padding:0.4rem 0.5rem;border-radius:6px;background:${bgStatus};border:1px solid ${corStatus};color:${txStatus};margin-bottom:0.35rem;">
-        📊 <strong>${indexados}/${total}</strong> documentos indexados na RAG
+        📊 <strong>${totalIndexados}/${totalArquivos}</strong> documentos indexados na RAG
       </div>
-      ${arquivos.map(f => `
-      <div style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.6rem;background:var(--email-light);border-radius:6px;border:1px solid ${f.indexado?'#c0dac8':'var(--fendi-border)'};">
-        <span style="font-size:0.85rem;">${/\.pdf$/i.test(f.nome)?'📄':/\.(doc|docx)$/i.test(f.nome)?'📝':'📃'}</span>
-        <span style="font-size:0.74rem;color:var(--dark-gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${f.nome}">${f.nome}</span>
-        ${f.tamanho_kb ? `<span style="font-size:0.62rem;color:var(--email-dark);">${f.tamanho_kb}KB</span>` : ''}
-        ${f.indexado
-          ? `<span style="padding:0.2rem 0.55rem;background:#eef5f0;border:1px solid #c0dac8;border-radius:5px;font-size:0.6rem;font-family:'Montserrat',sans-serif;font-weight:700;color:#5a8a6a;white-space:nowrap;" title="${f.chunks} chunks">✅ ${f.chunks} chunks</span>
-             <button onclick="reindexBucketFile('${f.nome}', this)" title="Forçar reindexação" style="padding:0.2rem 0.45rem;background:none;border:1px solid var(--fendi-border);border-radius:5px;font-size:0.6rem;color:var(--email-dark);cursor:pointer;">🔄</button>`
-          : `<button onclick="indexSingleBucketFile('${f.nome}', this)" style="padding:0.2rem 0.55rem;background:var(--fendi-dim);border:1px solid var(--fendi-border);border-radius:5px;font-size:0.62rem;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--fendi);cursor:pointer;white-space:nowrap;">Indexar</button>`
-        }
-      </div>`).join('')}`;
+      ${todos.map(nome => {
+        const indexado = arquivosIndexados.includes(nome);
+        const chunks   = chunksPorArquivo[nome] || 0;
+        const tamKb    = bucketMap[nome];
+        const noBucket = arquivosBucket.includes(nome);
+        const icone    = /\.pdf$/i.test(nome) ? '📄' : /\.(doc|docx)$/i.test(nome) ? '📝' : '📃';
+        const nomeSeguro = nome.replace(/'/g, "\\'");
+        return `
+        <div style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.6rem;background:var(--email-light);border-radius:6px;border:1px solid ${indexado?'#c0dac8':'var(--fendi-border)'};">
+          <span style="font-size:0.85rem;">${icone}</span>
+          <span style="font-size:0.74rem;color:var(--dark-gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${nome}">${nome}</span>
+          ${tamKb ? `<span style="font-size:0.62rem;color:var(--email-dark);">${tamKb}KB</span>` : ''}
+          ${indexado
+            ? `<span style="padding:0.2rem 0.55rem;background:#eef5f0;border:1px solid #c0dac8;border-radius:5px;font-size:0.6rem;font-family:'Montserrat',sans-serif;font-weight:700;color:#5a8a6a;white-space:nowrap;">✅ ${chunks} chunk${chunks!==1?'s':''}</span>
+               ${noBucket ? `<button onclick="reindexBucketFile('${nomeSeguro}', this)" title="Forçar reindexação" style="padding:0.2rem 0.45rem;background:none;border:1px solid var(--fendi-border);border-radius:5px;font-size:0.6rem;color:var(--email-dark);cursor:pointer;">🔄</button>` : ''}`
+            : `<button onclick="indexSingleBucketFile('${nomeSeguro}', this)" style="padding:0.2rem 0.55rem;background:var(--fendi-dim);border:1px solid var(--fendi-border);border-radius:5px;font-size:0.62rem;font-family:'Montserrat',sans-serif;font-weight:700;color:var(--fendi);cursor:pointer;white-space:nowrap;">Indexar</button>`
+          }
+        </div>`;
+      }).join('')}`;
 
   } catch(e) {
     listEl.innerHTML = `<div style="font-size:0.75rem;color:#b05a5a;">Erro ao listar documentos: ${e.message}</div>`;
@@ -785,16 +819,22 @@ async function indexSingleBucketFile(filename, btn) {
     const text = await extractTextFromFile(file);
     if (!text || text.length < 30) throw new Error('Texto extraído muito curto ou ilegível');
     const reply = await callEdgeFunction('bca-embed', { nome_arquivo: filename, texto: text.slice(0, 50000) });
-    if (btn && btn.textContent !== undefined) { btn.textContent = '✅'; if(btn.style) { btn.style.background='#eef5f0'; btn.style.color='#5a8a6a'; } }
+    if (btn && btn.textContent !== undefined) {
+      btn.textContent = '✅';
+      if (btn.style) { btn.style.background='#eef5f0'; btn.style.color='#5a8a6a'; }
+    }
     return { ok: true, nome: filename, reply };
   } catch(e) {
-    if (btn && btn.textContent !== undefined) { btn.textContent = '❌'; if(btn.style) { btn.style.background='#fdf0f0'; btn.style.color='#b05a5a'; } btn.disabled = false; btn.title = e.message; }
+    if (btn && btn.textContent !== undefined) {
+      btn.textContent = '❌';
+      if (btn.style) { btn.style.background='#fdf0f0'; btn.style.color='#b05a5a'; }
+      btn.disabled = false; btn.title = e.message;
+    }
     return { ok: false, nome: filename, erro: e.message };
   }
 }
 
 async function indexAllBucket() {
-  // Indexa apenas os não indexados
   const naoIndexados = _bucketFiles.filter(f => !f.indexado);
   if (naoIndexados.length === 0) { alert('Todos os documentos já estão indexados.'); return; }
 
@@ -822,10 +862,10 @@ async function indexAllBucket() {
   bar.style.width = '100%'; msg.textContent = 'Concluído!';
   result.style.display = 'block';
   if (fail === 0) {
-    result.style.cssText = 'display:block;background:#eef5f0;border:1px solid #c0dac8;color:#5a8a6a;';
+    result.style.cssText = 'display:block;background:#eef5f0;border:1px solid #c0dac8;color:#5a8a6a;padding:0.65rem 0.9rem;border-radius:8px;font-size:0.75rem;';
     result.innerHTML = `✅ <strong>${ok} documento(s)</strong> indexados com sucesso!`;
   } else {
-    result.style.cssText = 'display:block;background:#fff8e6;border:1px solid #f0d080;color:#8a7020;';
+    result.style.cssText = 'display:block;background:#fff8e6;border:1px solid #f0d080;color:#8a7020;padding:0.65rem 0.9rem;border-radius:8px;font-size:0.75rem;';
     result.innerHTML = `⚠️ <strong>${ok} ok</strong> · <strong>${fail} com erro:</strong><br>${failList.map(n=>`• ${n}`).join('<br>')}`;
   }
   btn.disabled = false; btn.textContent = '⚡ Indexar não indexados';
