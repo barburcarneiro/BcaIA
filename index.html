@@ -571,6 +571,52 @@ async function extractText(file) {
   return '';
 }
 
+// Converte arquivo para base64 (para envio ao servidor)
+function fileToBase64(file) {
+  return new Promise(function(res, rej) {
+    var r = new FileReader();
+    r.onload = function(e) { res(e.target.result.split(',')[1]); };
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// Decide o payload correto por tipo de arquivo:
+// DOCX → base64 (extração pelo servidor via mammoth)
+// PDF  → base64 (extração pelo servidor via Gemini Vision)
+// TXT  → texto plano
+async function prepararPayload(file) {
+  var nome = file.name;
+  if (/\.(doc|docx)$/i.test(nome)) {
+    var b64 = await fileToBase64(file);
+    return { base64: b64 };
+  }
+  if (/\.pdf$/i.test(nome)) {
+    // tenta extração local via pdf.js primeiro (mais rápido e sem custo de API)
+    if (typeof pdfjsLib !== 'undefined') {
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        var ab = await file.arrayBuffer();
+        var pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+        var pages = [];
+        for (var i = 1; i <= pdf.numPages; i++) {
+          var page = await pdf.getPage(i);
+          var ct = await page.getTextContent();
+          pages.push(ct.items.map(function(item) { return item.str; }).join(' '));
+        }
+        var texto = pages.join('\n\n').trim();
+        if (texto.length > 100) return { texto: texto };
+      } catch(_) {}
+    }
+    // fallback: envia base64 para o servidor extrair via Gemini
+    var b64pdf = await fileToBase64(file);
+    return { base64: b64pdf };
+  }
+  // TXT e outros
+  var texto = await extractText(file);
+  return { texto: texto };
+}
+
 async function analyzeContract() {
   var rp = document.getElementById('resultPlaceholder');
   var ld = document.getElementById('loadingResult');
@@ -709,9 +755,9 @@ async function indexFile(filename, btn) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var blob = await res.blob();
     var file = new File([blob], filename, { type: blob.type });
-    var text = await extractText(file);
-    if (!text || text.length < 30) throw new Error('Texto ilegivel');
-    await callEdgeFunction('bca-embed', { nome_arquivo: filename, texto: text.slice(0, 50000) });
+    var payload = await prepararPayload(file);
+    if (payload.texto && payload.texto.length < 30) throw new Error('Texto ilegivel');
+    await callEdgeFunction('bca-embed', Object.assign({ nome_arquivo: filename }, payload));
     if (btn && btn.textContent !== undefined) { btn.textContent = '✓'; if (btn.style) { btn.style.background = '#eef5f0'; btn.style.color = '#5a8a6a'; } }
     return { ok: true };
   } catch(e) {
@@ -772,10 +818,11 @@ async function sendToSupabase() {
     var f = uploadQueue[i];
     var se = document.getElementById('upStatus-' + i); se.textContent = 'Extraindo...'; se.className = 'up-file-status status-send';
     try {
-      var t = await extractText(f);
-      if (!t || t.trim().length < 50) throw new Error('Vazio ou ilegivel');
+      se.textContent = 'Preparando...';
+      var payload = await prepararPayload(f);
+      if (payload.texto && payload.texto.trim().length < 50) throw new Error('Vazio ou ilegivel');
       se.textContent = 'Vetorizando...';
-      await callEdgeFunction('bca-embed', { texto: t.slice(0, 150000), nome_arquivo: f.name, tipo: 'documento' });
+      await callEdgeFunction('bca-embed', Object.assign({ nome_arquivo: f.name, tipo: 'documento' }, payload));
       se.textContent = 'Indexado'; se.className = 'up-file-status status-ok'; ok++;
     } catch(e) { se.textContent = 'Erro'; se.className = 'up-file-status status-err'; se.title = e.message; fail++; }
   }
