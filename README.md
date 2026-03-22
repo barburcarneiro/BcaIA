@@ -1,2 +1,0 @@
-# LLMBca
-IA local BCA
