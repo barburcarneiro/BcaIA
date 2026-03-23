@@ -747,29 +747,44 @@ async function loadBucketFiles() {
   try {
     var s = loadSession();
     var tok = s && s.token ? s.token : SUPABASE_ANON_KEY;
-    var tR = await fetch(SUPABASE_URL + '/rest/v1/documentos?select=nome_arquivo&order=nome_arquivo.asc&limit=500', {
+
+    // FONTE PRIMÁRIA: tabela documentos (sempre disponível)
+    var tR = await fetch(SUPABASE_URL + '/rest/v1/documentos?select=nome_arquivo,id&order=nome_arquivo.asc&limit=500', {
       headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + tok }
     });
     var tRows = tR.ok ? await tR.json() : [];
-    var chk = {};
-    if (Array.isArray(tRows)) tRows.forEach(function(r) { if (r.nome_arquivo) chk[r.nome_arquivo] = (chk[r.nome_arquivo] || 0) + 1; });
+    var chk = {}, docIds = {};
+    if (Array.isArray(tRows)) tRows.forEach(function(r) {
+      if (r.nome_arquivo) {
+        chk[r.nome_arquivo] = (chk[r.nome_arquivo] || 0) + 1;
+        docIds[r.nome_arquivo] = r.id;
+      }
+    });
     var idxd = Object.keys(chk);
 
-    var bR = await fetch(SUPABASE_URL + '/storage/v1/object/list/documentos-bca', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
-      body: JSON.stringify({ limit: 200, offset: 0, sortBy: { column: 'name', order: 'asc' } })
-    });
-    var bFiles = bR.ok ? await bR.json() : [];
+    // FONTE SECUNDÁRIA: bucket (complementar — fornece tamanho KB)
     var bMap = {};
-    if (Array.isArray(bFiles)) bFiles.filter(function(f) { return f.name && /\.(pdf|doc|docx|txt)$/i.test(f.name); })
-      .forEach(function(f) { bMap[f.name] = f.metadata && f.metadata.size ? Math.round(f.metadata.size / 1024) : null; });
+    try {
+      var bR = await fetch(SUPABASE_URL + '/storage/v1/object/list/documentos-bca', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+        body: JSON.stringify({ limit: 200, offset: 0, sortBy: { column: 'name', order: 'asc' } })
+      });
+      var bFiles = bR.ok ? await bR.json() : [];
+      if (Array.isArray(bFiles)) bFiles.filter(function(f) { return f.name && /\.(pdf|doc|docx|txt)$/i.test(f.name); })
+        .forEach(function(f) { bMap[f.name] = f.metadata && f.metadata.size ? Math.round(f.metadata.size / 1024) : null; });
+    } catch(_) {} // bucket indisponível não bloqueia a listagem
+
     var bKeys = Object.keys(bMap);
 
+    // MERGE: documentos do banco + arquivos do bucket sem indexação
     var todos = Array.from(new Set(idxd.concat(bKeys))).sort();
     _bucketFiles = todos.map(function(nome) { return { name: nome, indexado: idxd.indexOf(nome) >= 0, chunks: chk[nome] || 0 }; });
 
-    if (todos.length === 0) { listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Nenhum documento encontrado.</div>'; return; }
+    if (todos.length === 0) {
+      listEl.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Nenhum documento encontrado. Envie documentos pelo painel abaixo.</div>';
+      return;
+    }
 
     var ti = idxd.length, ta = todos.length;
     var cs = ti === ta ? '#c0dac8' : '#f0d080', bs = ti === ta ? '#eef5f0' : '#fff8e6', ts = ti === ta ? '#5a8a6a' : '#8a7020';
@@ -778,9 +793,13 @@ async function loadBucketFiles() {
         var idx = idxd.indexOf(nome) >= 0, ch = chk[nome] || 0, kb = bMap[nome], inB = bKeys.indexOf(nome) >= 0;
         var ico = /\.pdf$/i.test(nome) ? '📄' : /\.(doc|docx)$/i.test(nome) ? '📝' : '📃';
         var ns = nome.replace(/'/g, "\\'");
+        var tagBucket = inB
+          ? '<span title="Arquivo disponível no bucket" style="font-size:0.6rem;color:#5a8a6a;">☁</span>'
+          : '<span title="Arquivo não está no bucket" style="font-size:0.6rem;color:var(--email-dark);">○</span>';
         return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.45rem 0.6rem;background:var(--email-light);border-radius:6px;border:1px solid ' + (idx ? '#c0dac8' : 'var(--fendi-border)') + ';">' +
           '<span style="font-size:0.85rem;">' + ico + '</span>' +
           '<span style="font-size:0.74rem;color:var(--dark-gray);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="' + nome + '">' + nome + '</span>' +
+          tagBucket +
           (kb ? '<span style="font-size:0.62rem;color:var(--email-dark);">' + kb + 'KB</span>' : '') +
           (idx
             ? '<span style="padding:0.2rem 0.55rem;background:#eef5f0;border:1px solid #c0dac8;border-radius:5px;font-size:0.6rem;font-family:Montserrat,sans-serif;font-weight:700;color:#5a8a6a;white-space:nowrap;">' + ch + ' chunk' + (ch !== 1 ? 's' : '') + '</span>'
