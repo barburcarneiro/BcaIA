@@ -835,8 +835,9 @@ async function reindexFile(filename, btn) {
 async function indexFile(filename, btn) {
   if (btn && btn.textContent !== undefined) { btn.textContent = '...'; btn.disabled = true; }
   try {
+    var s2 = loadSession(); var tok2 = s2 && s2.token ? s2.token : SUPABASE_ANON_KEY;
     var res = await fetch(SUPABASE_URL + '/storage/v1/object/documentos-bca/' + encodeURIComponent(filename), {
-      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + tok2 }
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var blob = await res.blob();
@@ -895,7 +896,7 @@ async function apagarDocumento(filename, rowEl) {
   // 2. Remove arquivo do bucket
   try {
     var delRes = await fetch(SUPABASE_URL + '/storage/v1/object/documentos-bca/' + encodeURIComponent(filename), {
-      method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY }
+      method: 'DELETE', headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + tok }
     });
     if (!delRes.ok) erros.push('bucket: HTTP ' + delRes.status);
   } catch(e) { erros.push('bucket: ' + e.message); }
@@ -916,7 +917,7 @@ function substituirDocumento(filename) {
       var ab = await f.arrayBuffer();
       var upRes = await fetch(SUPABASE_URL + '/storage/v1/object/documentos-bca/' + encodeURIComponent(filename), {
         method: 'POST',
-        headers: { 'Content-Type': f.type || 'application/octet-stream', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'x-upsert': 'true' },
+        headers: { 'Content-Type': f.type || 'application/octet-stream', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + tok, 'x-upsert': 'true' },
         body: ab
       });
       if (!upRes.ok) throw new Error('Bucket: HTTP ' + upRes.status);
@@ -957,6 +958,7 @@ async function sendToSupabase() {
   if (uploadQueue.length === 0) return;
   var btn = document.getElementById('upSendBtn'); btn.disabled = true; btn.textContent = 'Enviando...';
   var msg = document.getElementById('upResultMsg'); msg.className = 'up-result-msg';
+  var s = loadSession(); var tok = s && s.token ? s.token : SUPABASE_ANON_KEY;
   var ok = 0, fail = 0;
   for (var i = 0; i < uploadQueue.length; i++) {
     var f = uploadQueue[i];
@@ -966,7 +968,7 @@ async function sendToSupabase() {
       var ab = await f.arrayBuffer();
       var upRes = await fetch(SUPABASE_URL + '/storage/v1/object/documentos-bca/' + encodeURIComponent(f.name), {
         method: 'POST',
-        headers: { 'Content-Type': f.type || 'application/octet-stream', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'x-upsert': 'true' },
+        headers: { 'Content-Type': f.type || 'application/octet-stream', 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + tok, 'x-upsert': 'true' },
         body: ab
       });
       if (!upRes.ok) { var upErr = await upRes.text(); throw new Error('Bucket: ' + upRes.status + ' ' + upErr.slice(0,100)); }
