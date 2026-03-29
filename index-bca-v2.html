@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCA | Assistente Jurídico</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
+<style>
+:root{--black:#0a0a0a;--dark-gray:#444440;--fendi:#9d886d;--fendi-light:#e3ddca;--green-gray:#d0dbca;--email-dark:#8d8d8d;--email-light:#f7f7f7;--white:#ffffff;--fendi-dim:rgba(157,136,109,0.1);--fendi-border:rgba(157,136,109,0.22);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--email-light);color:var(--dark-gray);font-family:'Lato',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:56px;background:var(--black);flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:14px;}
+.logo-mark{font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.3rem;color:var(--fendi-light);letter-spacing:0.12em;}
+.logo-div{width:1px;height:18px;background:#333;}
+.logo-sub{font-family:'Lato',sans-serif;font-weight:300;font-size:0.7rem;color:var(--email-dark);letter-spacing:0.2em;text-transform:uppercase;}
+.privacy-badge{display:flex;align-items:center;gap:7px;font-size:0.73rem;color:var(--email-dark);}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--green-gray);animation:pulse 2.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.main{display:flex;flex:1;overflow:hidden;}
+.sidebar{width:228px;background:var(--white);border-right:1px solid var(--fendi-border);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-section{padding:1.5rem 1rem 0.5rem;}
+.sb-label{font-family:'Montserrat',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--fendi);padding:0 0.5rem;margin-bottom:0.6rem;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:0.58rem 0.75rem;border-radius:7px;cursor:pointer;font-size:0.82rem;color:var(--email-dark);transition:all 0.16s;margin-bottom:2px;font-family:'Lato',sans-serif;border:1px solid transparent;}
+.nav-item:hover{background:var(--email-light);color:var(--dark-gray);}
+.nav-item.active{background:var(--fendi-dim);color:var(--fendi);border-color:var(--fendi-border);font-weight:700;}
+.nav-icon{font-size:0.9rem;width:17px;text-align:center;}
+.sb-footer{margin-top:auto;padding:1rem;border-top:1px solid var(--fendi-border);background:var(--email-light);}
+.sb-footer-text{font-size:0.68rem;color:var(--email-dark);text-align:center;line-height:1.7;}
+.content{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+@media(max-width:768px){
+  .topbar{padding:0 0.75rem;height:48px;}.logo-sub{display:none;}
+  .privacy-badge span:not(.pdot){display:none;}.sidebar{display:none;}
+  .chat-messages{padding:0.75rem;}.chat-input-area{padding:0.6rem 0.75rem;}
+  .msg-bubble{max-width:82vw;font-size:0.82rem;}
+  .up-body{padding:0.75rem;}.up-header{padding:0.75rem 1rem;}.up-drop{padding:1.5rem 1rem;}
+}
+.panel{display:none;flex:1;overflow:hidden;}
+.panel.active{display:flex;flex-direction:column;}
+.chat-messages{flex:1;overflow-y:auto;padding:2rem;display:flex;flex-direction:column;gap:1.25rem;}
+.chat-messages::-webkit-scrollbar{width:4px;}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--fendi-border);border-radius:2px;}
+.message{display:flex;gap:0.875rem;max-width:820px;animation:fadeUp 0.25s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.message.user{flex-direction:row-reverse;align-self:flex-end;}
+.msg-av{width:33px;height:33px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-family:'Montserrat',sans-serif;font-weight:700;flex-shrink:0;}
+.msg-av.ai{background:var(--black);color:var(--fendi-light);}
+.msg-av.user{background:var(--fendi-light);color:var(--dark-gray);}
+.msg-bubble{background:var(--white);border:1px solid var(--fendi-border);border-radius:0 12px 12px 12px;padding:1rem 1.2rem;font-size:0.86rem;line-height:1.75;color:var(--dark-gray);max-width:600px;}
+.message.user .msg-bubble{background:var(--fendi-light);border-color:var(--fendi-border);border-radius:12px 0 12px 12px;}
+.msg-source{margin-top:0.45rem;font-size:0.69rem;color:var(--fendi);}
+.welcome-h{font-family:'Montserrat',sans-serif;font-size:0.88rem;font-weight:600;color:var(--black);margin-bottom:0.5rem;}
+.msg-bubble strong{font-weight:700;}
+.chat-input-area{padding:1.2rem 2rem;border-top:1px solid var(--fendi-border);background:var(--white);flex-shrink:0;}
+.input-wrap{display:flex;gap:0.7rem;align-items:flex-end;background:var(--email-light);border:1px solid var(--fendi-border);border-radius:10px;padding:0.7rem 1rem;transition:border-color 0.2s;}
+.input-wrap:focus-within{border-color:var(--fendi);}
+.chat-input{flex:1;background:none;border:none;outline:none;color:var(--dark-gray);font-family:'Lato',sans-serif;font-size:0.875rem;resize:none;max-height:120px;line-height:1.5;}
+.chat-input::placeholder{color:var(--email-dark);}
+.send-btn{background:var(--black);border:none;border-radius:8px;width:35px;height:35px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.18s;flex-shrink:0;color:var(--fendi-light);font-size:0.88rem;}
+.send-btn:hover{background:var(--dark-gray);}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.error-banner{background:#fdf0f0;border:1px solid #f0c0c0;border-radius:8px;padding:0.65rem 1rem;font-size:0.77rem;color:#b05a5a;margin-top:0.6rem;display:none;}
+.error-banner.show{display:block;}
+.debug-panel{background:#0d1117;border:1px solid #2a4a2a;border-radius:8px;padding:0.75rem 1rem;font-size:0.68rem;color:#7ec87e;font-family:'Courier New',monospace;margin-top:0.5rem;max-height:180px;overflow-y:auto;line-height:1.6;white-space:pre-wrap;word-break:break-all;display:none;}
+.debug-panel.show{display:block;}
+.debug-row{display:flex;align-items:center;gap:8px;margin-top:0.3rem;}
+.debug-toggle-btn{background:none;border:1px solid #2a3a2a;color:#4a7a4a;font-size:0.62rem;font-family:'Courier New',monospace;padding:2px 8px;border-radius:4px;cursor:pointer;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-ring{width:28px;height:28px;border:2px solid var(--fendi-border);border-top-color:var(--fendi);border-radius:50%;animation:spin 0.9s linear infinite;}
+.up-header{padding:1.5rem 2rem;background:var(--white);border-bottom:1px solid var(--fendi-border);flex-shrink:0;}
+.up-title{font-family:'Montserrat',sans-serif;font-size:0.85rem;font-weight:600;color:var(--dark-gray);margin-bottom:2px;}
+.up-sub{font-size:0.75rem;color:var(--email-dark);}
+.up-body{flex:1;overflow-y:auto;padding:2rem;display:flex;flex-direction:column;gap:1.25rem;max-width:700px;}
+.up-drop{border:2px dashed var(--fendi-border);border-radius:12px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all 0.22s;position:relative;background:var(--email-light);}
+.up-drop:hover,.up-drop.dragover{border-color:var(--fendi);background:var(--fendi-dim);}
+.up-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.up-drop-icon{font-size:2.5rem;margin-bottom:0.75rem;}
+.up-drop-text{font-size:0.85rem;color:var(--email-dark);line-height:1.7;}
+.up-drop-text strong{color:var(--fendi);}
+.up-queue{display:flex;flex-direction:column;gap:0.6rem;}
+.up-file-row{display:flex;align-items:center;gap:0.875rem;background:var(--white);border:1px solid var(--fendi-border);border-radius:8px;padding:0.8rem 1rem;}
+.up-file-icon{font-size:1.3rem;flex-shrink:0;}
+.up-file-info{flex:1;min-width:0;}
+.up-file-name{font-size:0.82rem;font-weight:700;color:var(--dark-gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.up-file-size{font-size:0.71rem;color:var(--email-dark);margin-top:2px;}
+.up-file-status{font-family:'Montserrat',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:0.2rem 0.6rem;border-radius:4px;flex-shrink:0;}
+.status-wait{background:var(--email-light);color:var(--email-dark);border:1px solid var(--fendi-border);}
+.status-send{background:#ece9ff;color:#6b5fa0;border:1px solid #ccc8ee;}
+.status-ok{background:#eef5f0;color:#5a8a6a;border:1px solid #c0dac8;}
+.status-err{background:#fdf0f0;color:#b05a5a;border:1px solid #f0c0c0;}
+.up-remove{background:none;border:none;color:var(--email-dark);cursor:pointer;font-size:1rem;padding:0.2rem;transition:color 0.16s;flex-shrink:0;}
+.up-remove:hover{color:#b05a5a;}
+.up-actions{display:flex;gap:0.75rem;}
+.up-btn{flex:1;padding:0.85rem;border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;cursor:pointer;transition:all 0.18s;}
+.up-btn-primary{background:var(--black);color:var(--fendi-light);}
+.up-btn-primary:hover{background:var(--dark-gray);}
+.up-btn-primary:disabled{opacity:0.3;cursor:not-allowed;}
+.up-btn-secondary{background:var(--email-light);color:var(--fendi);border:1px solid var(--fendi-border);}
+.up-btn-secondary:hover{background:var(--fendi-dim);}
+.up-result-msg{font-size:0.75rem;padding:0.6rem 0.9rem;border-radius:8px;margin-top:0.6rem;display:none;}
+.up-result-msg.ok{display:block;background:#eef5f0;color:#5a8a6a;border:1px solid #c0dac8;}
+.up-result-msg.err{display:block;background:#fdf0f0;color:#b05a5a;border:1px solid #f0c0c0;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--black);padding:1rem;">
+  <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border:1px solid rgba(157,136,109,0.18);border-radius:18px;padding:2.5rem 2rem;max-width:400px;width:100%;display:flex;flex-direction:column;gap:1.75rem;">
+    <div style="text-align:center;">
+      <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:2rem;color:var(--fendi-light);letter-spacing:0.12em;margin-bottom:0.5rem;">BCA</div>
+      <div style="width:48px;height:1px;background:rgba(157,136,109,0.3);margin:0 auto;"></div>
+    </div>
+    <div style="width:48px;height:1px;background:rgba(157,136,109,0.3);margin:0 auto;"></div>
+    <div>
+      <div style="font-family:'Montserrat',sans-serif;font-size:0.88rem;font-weight:600;color:var(--fendi-light);margin-bottom:0.5rem;">Assistente Juridico</div>
+      <div style="font-size:0.78rem;color:var(--email-dark);line-height:1.6;">Acesso restrito a equipe BCA.<br>Faca login com sua conta Google corporativa.</div>
+    </div>
+    <button id="loginBtn" onclick="loginWithGoogle()" style="display:flex;align-items:center;justify-content:center;gap:12px;background:var(--white);color:#444;border:none;border-radius:10px;padding:0.875rem 1.5rem;font-family:'Montserrat',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.2s;letter-spacing:0.04em;width:100%;" onmouseover="this.style.background='var(--fendi-light)'" onmouseout="this.style.background='var(--white)'">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+      Entrar com Google
+    </button>
+    <div id="loginError" style="display:none;background:#2a1010;border:1px solid #6b2020;border-radius:8px;padding:0.75rem 1rem;font-size:0.78rem;color:#f08080;line-height:1.5;white-space:pre-line;"></div>
+    <div id="loginLoading" style="display:none;color:var(--email-dark);font-size:0.78rem;">Verificando acesso...</div>
+    <div style="font-size:0.68rem;color:#555;line-height:1.6;">Apenas contas @barburcarneiro.com.br tem acesso.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appContent" style="display:none;flex-direction:column;height:100vh;">
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">BCA</div>
+    <div style="background:#1a6b3a;color:white;font-size:0.5rem;font-family:Montserrat,sans-serif;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.08em;">GEMINI</div>
+    <div class="logo-div"></div>
+    <div class="logo-sub">Barbur Carneiro Advogados</div>
+  </div>
+  <div class="privacy-badge">
+    <div class="pdot"></div>
+    <span style="font-size:0.7rem;">Gemini 2.5 Flash</span>
+    &nbsp;·&nbsp;
+    <span id="userEmail" style="font-size:0.7rem;">—</span>
+    <button onclick="logout()" style="margin-left:0.75rem;background:none;border:1px solid #333;color:var(--email-dark);border-radius:5px;padding:0.25rem 0.6rem;font-size:0.65rem;cursor:pointer;font-family:'Lato',sans-serif;transition:all 0.18s;" onmouseover="this.style.borderColor='var(--fendi)';this.style.color='var(--fendi)'" onmouseout="this.style.borderColor='#333';this.style.color='var(--email-dark)'">Sair</button>
+  </div>
+</div>
+<div class="main">
+  <div class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Ferramenta</div>
+      <div class="nav-item active" onclick="switchTab('chat',this)"><span class="nav-icon">💬</span> Consultor Jurídico</div>
+      <div class="nav-item" onclick="clearChat()" style="font-size:0.75rem;color:var(--email-dark);padding:0.4rem 0.75rem;"><span class="nav-icon" style="font-size:0.75rem;">🗑</span> Limpar histórico</div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Base de Conhecimento</div>
+      <div class="nav-item" onclick="switchTab('upload-docs',this)"><span class="nav-icon">📥</span> Adicionar Documentos</div>
+    </div>
+    <div class="sb-footer">
+      <div class="sb-footer-text">Dados processados via<br>Gemini + Supabase BCA</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- CHAT -->
+    <div class="panel active" id="panel-chat">
+
+      <div class="chat-messages" id="chatMessages">
+        <div class="message">
+          <div class="msg-av ai">BCA</div>
+          <div>
+            <div class="msg-bubble">
+              <div class="welcome-h">Consultor Jurídico BCA</div>
+              <div style="font-size:0.84rem;color:var(--email-dark);line-height:1.7">Consulte cláusulas contratuais e conceitos jurídicos da base BCA. Atuo nas áreas de Direito do Trabalho (empresarial) e Direito Imobiliário.</div>
+            </div>
+            <div class="msg-source">Gemini 2.5 Flash · Base BCA</div>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="input-wrap">
+          <textarea class="chat-input" id="chatInput" placeholder="Consulte cláusulas, conceitos ou modelos da base BCA..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">&#10148;</button>
+        </div>
+        <div class="error-banner" id="errorBanner"></div>
+        <div id="debugRow" class="debug-row" style="display:none;">
+          <button class="debug-toggle-btn" onclick="toggleDebug()">ver resposta bruta</button>
+        </div>
+        <div class="debug-panel" id="debugPanel"></div>
+      </div>
+
+    </div>
+
+    <!-- UPLOAD DOCS -->
+    <div class="panel" id="panel-upload-docs">
+      <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+        <div class="up-header">
+          <div class="up-title">Adicionar Documentos a Base de Conhecimento</div>
+          <div class="up-sub">Envie documentos para indexacao — ficam disponiveis no Consultor</div>
+        </div>
+        <div class="up-body">
+          <div style="background:var(--white);border:1px solid var(--fendi-border);border-radius:10px;padding:1.1rem 1.25rem;">
+            <div style="font-family:'Montserrat',sans-serif;font-size:0.65rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--fendi);margin-bottom:0.75rem;">Documentos na Base de Conhecimento</div>
+            <div style="font-size:0.77rem;color:var(--email-dark);margin-bottom:0.9rem;line-height:1.6;">Status de indexacao na RAG. Arquivos sem indexacao nao sao consultados pela IA.</div>
+            <div id="bucketList" style="display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.9rem;"><div style="font-size:0.75rem;color:var(--email-dark);">Carregando lista...</div></div>
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;">
+              <button onclick="loadBucketFiles()" style="padding:0.55rem 1rem;background:var(--email-light);border:1px solid var(--fendi-border);border-radius:7px;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;color:var(--fendi);cursor:pointer;">Atualizar lista</button>
+              <button id="indexAllBtn" onclick="indexAllBucket()" style="padding:0.55rem 1.2rem;background:var(--black);border:none;border-radius:7px;font-family:'Montserrat',sans-serif;font-size:0.68rem;font-weight:700;color:var(--fendi-light);cursor:pointer;">Indexar nao indexados</button>
+            </div>
+            <div id="bucketProgress" style="display:none;margin-top:0.75rem;">
+              <div style="font-size:0.72rem;color:var(--email-dark);margin-bottom:0.4rem;" id="bucketProgressMsg">Indexando...</div>
+              <div style="background:var(--email-light);border-radius:4px;height:6px;overflow:hidden;"><div id="bucketProgressBar" style="height:100%;background:var(--fendi);border-radius:4px;width:0%;transition:width 0.4s;"></div></div>
+            </div>
+            <div id="bucketResult" style="display:none;margin-top:0.75rem;padding:0.65rem 0.9rem;border-radius:8px;font-size:0.75rem;line-height:1.6;"></div>
+          </div>
+          <div class="up-drop" id="upDrop">
+            <input type="file" id="upFileInput" accept=".txt,.pdf,.doc,.docx" multiple onchange="addToQueue(this.files)"/>
+            <div class="up-drop-icon">📁</div>
+            <div class="up-drop-text">
+              <strong>Clique</strong> ou arraste arquivos aqui<br>
+              <span style="font-size:0.77rem;">TXT · PDF · DOC · DOCX</span>
+            </div>
+          </div>
+          <div class="up-queue" id="upQueue" style="display:none;"></div>
+          <div class="up-actions" id="upActions" style="display:none;">
+            <button class="up-btn up-btn-primary" id="upSendBtn" onclick="sendToSupabase()">Enviar para Base de Conhecimento</button>
+            <button class="up-btn up-btn-secondary" onclick="clearQueue()">Limpar fila</button>
+          </div>
+          <div class="up-result-msg" id="upResultMsg"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────
+const SUPABASE_URL      = 'https://hnhfbjuedesmkxrmmfan.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuaGZianVlZGVzbWt4cm1tZmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTcwMzYsImV4cCI6MjA4ODU3MzAzNn0.MemLsn-_uLOlo7YpK0u7ulRxuvMVHMIUJyKNv20jocY';
+const ALLOWED_DOMAIN    = 'barburcarneiro.com.br';
+
+// ── SESSION ───────────────────────────────────────────────────────
+function saveSession(token, email, refresh) {
+  localStorage.setItem('bca_token', token);
+  localStorage.setItem('bca_email', email);
+  if (refresh) localStorage.setItem('bca_refresh', refresh);
+}
+function loadSession() {
+  const token   = localStorage.getItem('bca_token');
+  const email   = localStorage.getItem('bca_email');
+  const refresh = localStorage.getItem('bca_refresh');
+  return (token && email) ? { token, email, refresh } : null;
+}
+function clearSession() {
+  localStorage.removeItem('bca_token');
+  localStorage.removeItem('bca_email');
+  localStorage.removeItem('bca_refresh');
+}
+
+// ── EDGE FUNCTION WRAPPER ─────────────────────────────────────────
+async function callEdgeFunction(fname, payload) {
+  const s = loadSession();
+  const tok = s && s.token ? s.token : SUPABASE_ANON_KEY;
+  const url = SUPABASE_URL + '/functions/v1/' + fname;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': 'Bearer ' + tok,
+      'apikey':        SUPABASE_ANON_KEY
+    },
+    body: JSON.stringify(payload)
+  });
+  const raw = await res.text();
+  window._lastRawResponse = raw;
+  window._lastStatus = res.status;
+
+  if (!res.ok) {
+    let e = 'HTTP ' + res.status;
+    try { const d = JSON.parse(raw); e = d.error || d.message || e; } catch(x) { e = e + ': ' + raw.slice(0, 200); }
+    throw new Error(e);
+  }
+
+  let data;
+  try { data = JSON.parse(raw); } catch(x) { throw new Error('Resposta invalida: ' + raw.slice(0, 200)); }
+  if (data.error) throw new Error(data.error);
+
+  const rep = data.response != null ? data.response : (data.text != null ? data.text : (data.answer != null ? data.answer : (data.content != null ? data.content : data.result)));
+  if (rep === undefined || rep === null) throw new Error('Sem campo response. Campos: ' + JSON.stringify(Object.keys(data)));
+  return rep;
+}
+
+// ── NAVEGACAO ─────────────────────────────────────────────────────
+function switchPanel(p) {
+  document.querySelectorAll('.panel').forEach(function(x) { x.classList.remove('active'); });
+  var panelEl = document.getElementById('panel-' + p);
+  if (panelEl) panelEl.classList.add('active');
+}
+function switchTab(p, el) {
+  switchPanel(p);
+  document.querySelectorAll('.nav-item').forEach(function(x) { x.classList.remove('active'); });
+  if (el) el.classList.add('active');
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+function showError(msg) {
+  const b = document.getElementById('errorBanner');
+  b.textContent = msg; b.classList.add('show');
+  setTimeout(function() { b.classList.remove('show'); }, 8000);
+}
+function toggleDebug() {
+  const p = document.getElementById('debugPanel');
+  if (p.classList.contains('show')) { p.classList.remove('show'); return; }
+  p.textContent = 'HTTP ' + (window._lastStatus || '?') + '\n\n' + (window._lastRawResponse || '(sem dados)');
+  p.classList.add('show');
+}
+function fmt(text) {
+  return text
+    .replace(/\*\*__(.*?)__\*\*/g, '<strong><u>$1</u></strong>')
+    .replace(/__(.*?)__/g, '<u>$1</u>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br>');
+}
+function addMessage(html, isUser) {
+  const c = document.getElementById('chatMessages');
+  const av = isUser ? '<div class="msg-av user">👤</div>' : '<div class="msg-av ai">BCA</div>';
+  const cls = isUser ? 'message user' : 'message';
+  const bbl = '<div class="msg-bubble">' + html + '</div>';
+  const src = isUser ? '' : '<div class="msg-source">Gemini 2.5 Flash · Base BCA</div>';
+  c.insertAdjacentHTML('beforeend', '<div class="' + cls + '">' + av + '<div>' + bbl + src + '</div></div>');
+  c.scrollTop = c.scrollHeight;
+}
+function clearChat() {
+  const m = document.getElementById('chatMessages');
+  m.innerHTML = '<div class="message"><div class="msg-av ai">BCA</div><div><div class="msg-bubble"><div class="welcome-h">Consultor Jurídico BCA</div><div style="font-size:0.84rem;color:var(--email-dark);line-height:1.7">Consulte cláusulas contratuais e conceitos jurídicos da base BCA. Atuo nas áreas de Direito do Trabalho (empresarial) e Direito Imobiliário.</div></div><div class="msg-source">Gemini 2.5 Flash · Base BCA</div></div></div>';
+}
+async function sendMessage() {
+  const inp = document.getElementById('chatInput');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  addMessage(fmt(txt), true);
+  inp.value = ''; inp.style.height = 'auto';
+  document.getElementById('debugRow').style.display = 'flex';
+  addMessage('<div class="loading-ring"></div>', false);
+  try {
+    const ans = await callEdgeFunction('bca-docs', { message: txt });
+    const msgs = document.querySelectorAll('.message');
+    if (msgs.length > 0) msgs[msgs.length - 1].remove();
+    addMessage(fmt(ans), false);
+  } catch(err) {
+    const msgs = document.querySelectorAll('.message');
+    if (msgs.length > 0) msgs[msgs.length - 1].remove();
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── BUCKET LIST ───────────────────────────────────────────────────
+async function loadBucketFiles() {
+  const el = document.getElementById('bucketList');
+  el.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Carregando...</div>';
+  try {
+    const reply = await callEdgeFunction('bca-docs', { mode: 'list-docs' });
+    const raw = typeof reply === 'string' ? JSON.parse(reply) : reply;
+    const arq = raw.arquivos || [];
+    if (arq.length === 0) { el.innerHTML = '<div style="font-size:0.75rem;color:var(--email-dark);">Nenhum arquivo encontrado.</div>'; return; }
+    el.innerHTML = arq.map(function(f) {
+      const ico = f.indexado ? '✅' : '⏳';
+      const st = f.indexado ? 'Indexado' : 'Aguardando indexação';
+      const dt = f.indexado && f.indexado_em ? new Date(f.indexado_em).toLocaleDateString('pt-BR') : '';
+      return '<div style="display:flex;align-items:center;gap:0.6rem;padding:0.5rem 0.7rem;background:var(--email-light);border-radius:6px;"><span style="font-size:1rem;">' + ico + '</span><div style="flex:1;min-width:0;"><div style="font-size:0.75rem;font-weight:700;color:var(--dark-gray);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + f.nome + '</div><div style="font-size:0.66rem;color:var(--email-dark);">' + st + (dt ? ' · ' + dt : '') + (f.chunks > 0 ? ' · ' + f.chunks + ' chunks' : '') + '</div></div></div>';
+    }).join('');
+  } catch(err) { el.innerHTML = '<div style="font-size:0.75rem;color:#b05a5a;">Erro: ' + err.message + '</div>'; }
+}
+async function indexAllBucket() {
+  const el = document.getElementById('bucketList');
+  const btn = document.getElementById('indexAllBtn');
+  const prog = document.getElementById('bucketProgress');
+  const bar = document.getElementById('bucketProgressBar');
+  const msg = document.getElementById('bucketProgressMsg');
+  const result = document.getElementById('bucketResult');
+  btn.disabled = true;
+  prog.style.display = 'block';
+  result.style.display = 'none';
+  try {
+    const reply = await callEdgeFunction('bca-docs', { mode: 'list-docs' });
+    const raw = typeof reply === 'string' ? JSON.parse(reply) : reply;
+    const arq = (raw.arquivos || []).filter(f => !f.indexado);
+    if (arq.length === 0) { result.innerHTML = 'Todos os arquivos já estão indexados.'; result.style.display = 'block'; result.style.background = '#eef5f0'; result.style.color = '#5a8a6a'; result.style.border = '1px solid #c0dac8'; prog.style.display = 'none'; btn.disabled = false; return; }
+    let ok = 0, fail = 0;
+    for (let i = 0; i < arq.length; i++) {
+      const f = arq[i];
+      msg.textContent = 'Indexando ' + f.nome + ' (' + (i + 1) + '/' + arq.length + ')...';
+      bar.style.width = ((i + 1) / arq.length * 100) + '%';
+      const s = loadSession();
+      const tok = s && s.token ? s.token : SUPABASE_ANON_KEY;
+      const url = SUPABASE_URL + '/storage/v1/object/public/documentos-bca/' + encodeURIComponent(f.nome);
+      const res = await fetch(url);
+      if (!res.ok) { fail++; continue; }
+      const blob = await res.blob();
+      const b64 = await new Promise(function(r) { const reader = new FileReader(); reader.onload = function() { r(reader.result.split(',')[1]); }; reader.readAsDataURL(blob); });
+      try {
+        await callEdgeFunction('bca-embed', { nome_arquivo: f.nome, base64: b64, tipo: 'documento' });
+        ok++;
+      } catch(e) { fail++; }
+    }
+    result.innerHTML = ok + ' arquivo(s) indexado(s)' + (fail > 0 ? ' · ' + fail + ' com erro' : '');
+    result.style.display = 'block';
+    result.style.background = fail > 0 ? '#fdf0f0' : '#eef5f0';
+    result.style.color = fail > 0 ? '#b05a5a' : '#5a8a6a';
+    result.style.border = fail > 0 ? '1px solid #f0c0c0' : '1px solid #c0dac8';
+    setTimeout(loadBucketFiles, 1500);
+  } catch(err) {
+    result.innerHTML = 'Erro: ' + err.message;
+    result.style.display = 'block';
+    result.style.background = '#fdf0f0';
+    result.style.color = '#b05a5a';
+    result.style.border = '1px solid #f0c0c0';
+  } finally {
+    prog.style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+// ── PREPARAR PAYLOAD (PDF/DOCX) ───────────────────────────────────
+async function prepararPayload(file) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function() {
+      const b64 = reader.result.split(',')[1];
+      if (/\.(pdf|doc|docx)$/i.test(file.name)) {
+        resolve({ base64: b64 });
+      } else {
+        const txt = atob(b64);
+        resolve({ texto: txt });
+      }
+    };
+    reader.onerror = function() { reject(new Error('Erro ao ler arquivo')); };
+    reader.readAsDataURL(file);
+  });
+}
+function openFileDialog() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.txt,.pdf,.doc,.docx';
+  input.multiple = true;
+  input.onchange = function(e) {
+    if (e.target.files && e.target.files.length > 0) addToQueue(e.target.files);
+  };
+  input.click();
+}
+
+// ── UPLOAD DE DOCUMENTOS ─────────────────────────────────────────
+var uploadQueue = [];
+function addToQueue(files) {
+  Array.from(files).forEach(function(f) { if (!uploadQueue.find(function(x) { return x.name === f.name; })) uploadQueue.push(f); });
+  renderQueue();
+}
+function renderQueue() {
+  var q = document.getElementById('upQueue'), a = document.getElementById('upActions');
+  if (uploadQueue.length === 0) { q.style.display = 'none'; a.style.display = 'none'; return; }
+  q.style.display = 'flex'; a.style.display = 'flex';
+  q.innerHTML = uploadQueue.map(function(f, i) {
+    return '<div class="up-file-row" id="upRow-' + i + '"><div class="up-file-icon">' + (f.name.endsWith('.pdf') ? '📕' : '📘') + '</div><div class="up-file-info"><div class="up-file-name" title="' + f.name + '">' + f.name + '</div><div class="up-file-size">' + (f.size / 1024).toFixed(1) + ' KB</div></div><span class="up-file-status status-wait" id="upStatus-' + i + '">Aguardando</span><button class="up-remove" onclick="removeFromQueue(' + i + ')">✕</button></div>';
+  }).join('');
+}
+function removeFromQueue(i) { uploadQueue.splice(i, 1); renderQueue(); }
+function clearQueue() { uploadQueue = []; renderQueue(); document.getElementById('upResultMsg').className = 'up-result-msg'; document.getElementById('upFileInput').value = ''; }
+async function sendToSupabase() {
+  if (uploadQueue.length === 0) return;
+  var btn = document.getElementById('upSendBtn'); btn.disabled = true; btn.textContent = 'Enviando...';
+  var msg = document.getElementById('upResultMsg'); msg.className = 'up-result-msg';
+  var s = loadSession(); var tok = s && s.token ? s.token : SUPABASE_ANON_KEY;
+  var ok = 0, fail = 0;
+  for (var i = 0; i < uploadQueue.length; i++) {
+    var f = uploadQueue[i];
+    var se = document.getElementById('upStatus-' + i); se.textContent = 'Extraindo...'; se.className = 'up-file-status status-send';
+    try {
+      se.textContent = 'Preparando...';
+      var payload = await prepararPayload(f);
+      if (payload.texto && payload.texto.trim().length < 50) throw new Error('Vazio ou ilegivel');
+      se.textContent = 'Vetorizando...';
+      await callEdgeFunction('bca-embed', Object.assign({ nome_arquivo: f.name, tipo: 'documento' }, payload));
+      se.textContent = 'Indexado'; se.className = 'up-file-status status-ok'; ok++;
+    } catch(e) { se.textContent = 'Erro'; se.className = 'up-file-status status-err'; se.title = e.message; fail++; }
+  }
+  btn.disabled = false; btn.textContent = 'Enviar para Base de Conhecimento';
+  if (ok > 0 && fail === 0) { msg.textContent = ok + ' documento(s) indexado(s)!'; msg.className = 'up-result-msg ok'; }
+  else if (fail > 0) { msg.textContent = ok + ' indexado(s) · ' + fail + ' com erro.'; msg.className = 'up-result-msg err'; }
+  setTimeout(loadBucketFiles, 1500);
+}
+var upDrop = document.getElementById('upDrop');
+upDrop.addEventListener('dragover', function(e) { e.preventDefault(); upDrop.classList.add('dragover'); });
+upDrop.addEventListener('dragleave', function() { upDrop.classList.remove('dragover'); });
+upDrop.addEventListener('drop', function(e) { e.preventDefault(); upDrop.classList.remove('dragover'); addToQueue(e.dataTransfer.files); });
+
+// ── AUTH ──────────────────────────────────────────────────────────
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContent').style.display = 'none';
+}
+function showApp(email) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = 'flex';
+  document.getElementById('userEmail').textContent = email;
+  loadBucketFiles();
+}
+function showLoginError(msg) {
+  var el = document.getElementById('loginError'); el.textContent = msg; el.style.display = 'block';
+  document.getElementById('loginLoading').style.display = 'none';
+  document.getElementById('loginBtn').style.display = 'flex';
+}
+function loginWithGoogle() {
+  document.getElementById('loginBtn').style.display = 'none';
+  document.getElementById('loginLoading').style.display = 'block';
+  document.getElementById('loginError').style.display = 'none';
+  var redirectTo = encodeURIComponent(window.location.href.split('#')[0]);
+  window.location.href = SUPABASE_URL + '/auth/v1/authorize?provider=google&redirect_to=' + redirectTo;
+}
+function logout() {
+  var s = loadSession();
+  if (s && s.token) fetch(SUPABASE_URL + '/auth/v1/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + s.token, 'apikey': SUPABASE_ANON_KEY } }).catch(function() {});
+  clearSession(); showLogin();
+}
+function initAuth() {
+  var saved = loadSession();
+  if (saved && saved.token && saved.email) { showApp(saved.email); return; }
+  var hash = window.location.hash;
+  if (hash.indexOf('access_token') >= 0) {
+    try {
+      var params = new URLSearchParams(hash.substring(1));
+      var at = params.get('access_token');
+      var rt = params.get('refresh_token');
+      history.replaceState(null, '', window.location.pathname + window.location.search);
+      var payload = JSON.parse(atob(at.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      var email = (payload && payload.email) ? payload.email : ((payload && payload.user_metadata && payload.user_metadata.email) ? payload.user_metadata.email : '');
+      if (!email) { showLogin(); showLoginError('Nao foi possivel identificar o e-mail.'); return; }
+      if (email.toLowerCase().indexOf(ALLOWED_DOMAIN) >= 0) {
+        saveSession(at, email, rt);
+        showApp(email);
+      } else {
+        showLogin();
+        showLoginError('Acesso negado. Apenas contas ' + ALLOWED_DOMAIN + '.\nTentou: ' + email);
+      }
+    } catch(err) { showLogin(); showLoginError('Erro ao processar login: ' + err.message); }
+    return;
+  }
+  showLogin();
+}
+
+window.addEventListener('load', function() { initAuth(); });
+</script>
+</body>
+</html>
